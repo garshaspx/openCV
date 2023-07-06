@@ -53,6 +53,11 @@ def save(img):
 ##############matching features  
 bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 cam = cv2.VideoCapture(0)
+
+#set cam resolution
+#cam.set(3, 1920)
+#cam.set(4, 1080)
+
 highest_match = [0, 0]
 txt_list = []
 for i in os.listdir(address+"\\"+"features"):
