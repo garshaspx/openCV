@@ -11,7 +11,7 @@ import pandas as pd
 from datetime import datetime
 from openpyxl import Workbook
 
-
+#hey youuuu
 ################# extracting features
 address = "C:\\Users\\garshasp\\pictures"
 sift = cv2.xfeatures2d.SIFT_create()
@@ -27,9 +27,6 @@ for i in os.listdir(address):
                 des_numpy = ' '.join(str(value) for value in j)
                 file.write(des_numpy + '\n')
         print(f"image {i} completed")
-
-
-
 
 ############## data center
 excel_address = "C:\\Users\\garshasp\\Documents\\openCV_datacenter.xlsx"
@@ -51,8 +48,6 @@ def save(img):
     df.loc[len(df.index)] = [time, img, None]
     with pd.ExcelWriter(excel_address, engine="auto") as excel:
         df.to_excel(excel, sheet_name="image_info")
-
-
 
     
 ##############matching features  
