@@ -1,25 +1,35 @@
-#find most similar from a library
-#and save info in exel
 #
 #
+# 
 #
 
+from PIL import Image
+from rembg import remove
 import cv2
-import os
 import numpy as np
+import cv2
+from os import listdir
 import pandas as pd
 from datetime import datetime
 from openpyxl import Workbook
 
 
-#hey youuuu
-################# extracting features
-
 address = "C:\\Users\\garshasp\\Pictures"
 sift = cv2.xfeatures2d.SIFT_create()
 
+def back_remover():
+    for i in listdir(address):
+        if i[-3:].lower() == "jpg" or i[-3:].lower() == "png":
+            im = Image.open(address+"\\"+i)
+            noback = remove(im)
+            bg = Image.new("RGB", noback.size, (255, 255, 255))
+            bg.paste(noback, noback)
+            bg.save(address+"\\"+i)
 
-for i in os.listdir(address):
+
+#back_remover()
+
+for i in listdir(address):
     if i[-3:].lower() == "jpg" or i[-3:].lower() == "png":
         image = cv2.imread(address+"\\"+i)
         image = cv2.convertScaleAbs(image)
@@ -48,10 +58,10 @@ def save(img):
 
     if len(df.index) > 0 and df.loc[len(df.index)-1][1] == img :
         return
-
     df.loc[len(df.index)] = [time, img, None]
     with pd.ExcelWriter(excel_address, engine="auto") as excel:
         df.to_excel(excel, sheet_name="image_info")
+        
 ##############matching features  
 bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 cam = cv2.VideoCapture(0)
@@ -62,7 +72,7 @@ cam = cv2.VideoCapture(0)
 
 highest_match = [0, 0]
 txt_list = []
-for i in os.listdir(address+"\\"+"features"):
+for i in listdir(address+"\\"+"features"):
     txt_list.append(i)
 
 while True:
