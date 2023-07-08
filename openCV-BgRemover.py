@@ -7,12 +7,10 @@ from PIL import Image
 from rembg import remove
 import cv2
 import numpy as np
-import cv2
 from os import listdir
 import pandas as pd
 from datetime import datetime
 from openpyxl import Workbook
-
 
 address = "C:\\Users\\garshasp\\Pictures"
 sift = cv2.xfeatures2d.SIFT_create()
@@ -25,8 +23,6 @@ def back_remover():
             bg = Image.new("RGB", noback.size, (255, 255, 255))
             bg.paste(noback, noback)
             bg.save(address+"\\"+i)
-
-
 #back_remover()
 
 for i in listdir(address):
@@ -97,4 +93,3 @@ while True:
     cv2.putText(matcher, "camera", (300, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)  
     cv2.imshow("two image", matcher)
     cv2.waitKey(1)
-    
