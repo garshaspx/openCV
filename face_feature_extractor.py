@@ -4,7 +4,7 @@ import numpy as np
 
 video_capture = cv2.VideoCapture(0)
 
-root_image = face_recognition.load_image_file("C:\\Users\\garshasp\\Pictures\\WIN_20230710_12_47_28_Pro.jpg")
+root_image = face_recognition.load_image_file("C:\\Users\\garshasp\\Pictures\\WIN_20230708_10_50_25_Pro.jpg")
 root_encoding = face_recognition.face_encodings(root_image)[0]
 root_image2 = face_recognition.load_image_file("C:\\Users\\garshasp\\Pictures\\photo_2023-07-10_14-01-14.jpg")
 root_encoding2 = face_recognition.face_encodings(root_image2)[0]
