@@ -102,14 +102,14 @@ except:
 
 
 
-
-
+#info = [library-address,  video-input]
+info = [None, None]
 
 
 def library():
     lib_win = tkinter.Tk()
     lib_win.title("library manager")
-    lib_win.geometry("409x260")    
+    lib_win.geometry("410x260")    
     tv = ttk.Treeview(lib_win, columns="number", height=9)
     tv.place(x=0, y=0)
     tv.heading("#0", text="Name")
@@ -169,8 +169,16 @@ def library():
             con_file.write(i+"\n")
         con_file.close()
         refresh_lib()
-    tkinter.Button(lib_win, text="add library", command=lambda : add_direc_txt()).place(x=50, y=220)
-    tkinter.Button(lib_win, text="delete library", command=lambda: delete()).place(x=150, y=220)
+    def active():
+        ac = int(tv.focus())
+        con_file = open(file_adress, "r")
+        kk = con_file.readlines()
+        info[0] = kk[ac]
+        tkinter.Label(win, text=f"library is now active : {info[0]}").pack()
+        win.update()
+    tkinter.Button(lib_win, text="add library", command=lambda : add_direc_txt()).place(x=40, y=220)
+    tkinter.Button(lib_win, text="delete library", command=lambda: delete()).place(x=135, y=220)
+    tkinter.Button(lib_win, text="active library", command=lambda: active()).place(x=240, y=220)
 
     
 
@@ -254,8 +262,7 @@ def setting():
 
 
 
-def start():
-    
+def hf():
     print("start main")
     index = 0
     arr = []
@@ -268,18 +275,19 @@ def start():
         cap.release()
         index += 1
 
-        
-    
+def start():
+    # checks the first 10 indexes.
+    index = 0
+    arr = []
+    i = 10
+    while i > 0:
+        cap = cv2.VideoCapture(index)
+        if cap.read()[0]:
+            arr.append(index)
+            cap.release()
+        index += 1
+        i -= 1
     print(arr)
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
 
 
@@ -291,8 +299,117 @@ def start():
 
 
 
-but1 = tkinter.Button(win, text="start", command= lambda : start()).pack()
-but2 = tkinter.Button(win, text="library manager", command= lambda : library()).pack()
-but3 = tkinter.Button(win, text="setting", command= lambda : setting()).pack()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def video():
+    vid_win = tkinter.Tk()
+    vid_win.title("choose video input")
+    vid_win.geometry("320x110")
+    tkinter.Label(vid_win, text="choose a camera : ").place(x=20, y=10)
+    cam_chooser = ttk.Combobox(vid_win, width = 20, textvariable = tkinter.StringVar())
+    cam_chooser['values'] = (' webcam', ' cam 14', ' cam 32c')    
+    cam_chooser.place(x=150, y=10)
+    cam_chooser.current(0)
+    tkinter.Label(vid_win, text="choose a video : ").place(x=20, y=50)
+    tkinter.Button(vid_win, text="choose", command=lambda:camer_list()).place(x=200, y=50)    
+    tkinter.Button(vid_win, text="save", fg="red", command=lambda:save()).place(x=270, y=80)
+
+
+    def camer_list():
+        print("")
+        """
+        fill the camera list 
+                 add it
+        """
+
+    def save():
+        info[1] = cam_chooser.get()
+        print(info)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+tkinter.Button(win, text="start", command= lambda : start()).pack()
+tkinter.Button(win, text="choose input", command=lambda: video()).pack()
+tkinter.Button(win, text="library manager", command= lambda : library()).pack()
+tkinter.Button(win, text="setting", command= lambda : setting()).pack()
 
 win.mainloop()
