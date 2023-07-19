@@ -24,7 +24,7 @@ def back_remover():
             bg = Image.new("RGB", noback.size, (255, 255, 255))
             bg.paste(noback, noback)
             bg.save(address+"\\"+i)
-#back_remover()
+back_remover()
 
 for i in listdir(address):
     if i[-3:].lower() == "jpg" or i[-3:].lower() == "png":

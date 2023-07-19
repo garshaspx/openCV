@@ -11,6 +11,19 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
   
 
 
@@ -24,8 +37,8 @@ from tkinter import filedialog
 from tkinter import ttk
 from getpass import getuser
 import cv2
-
-
+from tkinter import messagebox
+import os
 
 
 
@@ -60,7 +73,7 @@ import cv2
 
 win = tkinter.Tk()
 win.title("image processor")
-win.geometry("400x270")
+win.geometry("450x270")
 
 labe_intro = tkinter.Label(text="wellcome").pack()
 file_adress = "C:\\Users\\"+getuser()+"\Documents\data.txt"
@@ -103,7 +116,7 @@ except:
 
 
 #info = [library-address,  video-input]
-info = [None, None]
+info = ["None", "None"]
 
 
 def library():
@@ -208,99 +221,36 @@ def library():
 
 
 
+sift = cv2.xfeatures2d.SIFT_create()
 
 
-
-
-
-
-
-
-
-
-
-
-
-def setting():
-    
-    S_win = tkinter.Tk()
-    S_win.title("setting")
-    S_win.geometry("300x150")
-    
-    
-    """
-    add setting to choose camera and other stuff
-    """    
-    print("setting opened")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def hf():
-    print("start main")
-    index = 0
-    arr = []
-    while True:
-        cap = cv2.VideoCapture(index)
-        if not cap.read()[0]:
-            break
-        else:
-            arr.append(index)
-        cap.release()
-        index += 1
 
 def start():
-    # checks the first 10 indexes.
-    index = 0
-    arr = []
-    i = 10
-    while i > 0:
-        cap = cv2.VideoCapture(index)
-        if cap.read()[0]:
-            arr.append(index)
-            cap.release()
-        index += 1
-        i -= 1
-    print(arr)
+    print("main program")
+    
+ #   if info[0] == "None" or info[1] == "None":
+  #      print("FGN")
+   #     messagebox.showerror("error", "choose your library and input first")
+#        return
+
+    adds = info[0].rstrip().split("==")
+    os.mkdir(os.path.join(adds[1], "features"))
+    for i in os.listdir(adds[1]):
+        if i[-3:].lower() == "jpg" or i[-3:].lower() == "png":
+            image = cv2.imread(adds[1]+"\\"+i)
+            image = cv2.convertScaleAbs(image)
+            BW_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            keypoints, descriptors = sift.detectAndCompute(BW_image, None)
+            with open(adds[1]+"\\"+"features\\"+i[0:-4]+".txt", "w") as file:
+                for j in descriptors:
+                    des_numpy = ' '.join(str(value) for value in j)
+                    file.write(des_numpy + '\n')
+            print(f"image {i} features extracted")
+    
 
 
 
-
-
-
-
-
-
-
-
-
-
+    
 
 
 
@@ -342,24 +292,30 @@ def video():
     vid_win.geometry("320x110")
     tkinter.Label(vid_win, text="choose a camera : ").place(x=20, y=10)
     cam_chooser = ttk.Combobox(vid_win, width = 20, textvariable = tkinter.StringVar())
+    
+    #fill the camera list 
+    #add it
+    
     cam_chooser['values'] = (' webcam', ' cam 14', ' cam 32c')    
     cam_chooser.place(x=150, y=10)
     cam_chooser.current(0)
     tkinter.Label(vid_win, text="choose a video : ").place(x=20, y=50)
-    tkinter.Button(vid_win, text="choose", command=lambda:camer_list()).place(x=200, y=50)    
+    tkinter.Button(vid_win, text="choose", command=lambda:video_loc()).place(x=200, y=50)    
     tkinter.Button(vid_win, text="save", fg="red", command=lambda:save()).place(x=270, y=80)
 
 
-    def camer_list():
-        print("")
-        """
-        fill the camera list 
-                 add it
-        """
-
+    def video_loc():
+        info[1] = filedialog.askopenfilename()    
+        win.bind('<FocusIn>', win.lower())
+        if info[1][-3:] == "mp4":
+            tkinter.Label(win, text=info).pack()
+            win.update()
+            vid_win.destroy()
+        else:
+            messagebox.showerror("file type", "make sure the file you choose is a mp4")
     def save():
         info[1] = cam_chooser.get()
-        print(info)
+        vid_win.destroy()
 
 
 
@@ -396,6 +352,36 @@ def video():
 
 
 
+
+
+
+
+def setting():
+    
+    S_win = tkinter.Tk()
+    S_win.title("setting")
+    S_win.geometry("300x150")
+    
+    
+    """
+    add setting to choose camera and other stuff
+    """    
+    print("setting opened")
+    
+
+def starxnxfnt():
+    # checks the first 10 indexes.
+    index = 0
+    arr = []
+    i = 10
+    while i > 0:
+        cap = cv2.VideoCapture(index)
+        if cap.read()[0]:
+            arr.append(index)
+            cap.release()
+        index += 1
+        i -= 1
+    print(arr)
 
 
 
