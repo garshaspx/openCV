@@ -85,6 +85,7 @@ while True:
     
     cv2.putText(matcher, f"image found: {highest_match[1][:-4]}.jpg", (750, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
     cv2.putText(matcher, "camera", (300, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)  
+    
     cv2.imshow("two image", matcher)
     cv2.waitKey(1)
     
