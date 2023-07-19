@@ -14,16 +14,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
   
 
 
@@ -31,14 +21,16 @@
 
 
 
-
+import cv2
+import os
+import numpy as np
 import tkinter
 from tkinter import filedialog
 from tkinter import ttk
-from getpass import getuser
-import cv2
 from tkinter import messagebox
-import os
+from getpass import getuser
+
+
 
 
 
@@ -120,6 +112,7 @@ info = ["None", "None"]
 
 
 def library():
+    global info
     lib_win = tkinter.Tk()
     lib_win.title("library manager")
     lib_win.geometry("410x260")    
@@ -217,24 +210,79 @@ def library():
 
 
 
-
-
-
-
+cam = cv2.VideoCapture("C:\\Users\\garshasp\\Pictures\\Camera Roll\\WIN_20230717_12_42_32_Pro.mp4")
 sift = cv2.xfeatures2d.SIFT_create()
+bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
+highest_match = [0, 0]
+
+
+
+
+
 
 
 
 def start():
-    print("main program")
+#    if info[0] == "None" or info[1] == "None":
+ #       print("FGN")
+  #      messagebox.showerror("error", "choose your library and input first")
+   #     return    
     
- #   if info[0] == "None" or info[1] == "None":
-  #      print("FGN")
-   #     messagebox.showerror("error", "choose your library and input first")
-#        return
+    
+    
+    
+    global info
+    print("main program")
+
+
+
+    win_start = tkinter.Tk()
+    win_start.title("image matcher")
+    win_start.geometry("300x140")
+    
+    tkinter.Label(win_start, text="start matching :").place(x=30, y=20)
+    tkinter.Button(win_start, text="start").place(x=130, y=20)
+    
+    tkinter.Label(win_start, text="stop matching :").place(x=30, y=90)
+    tkinter.Button(win_start, text="stop").place(x=130, y=90)
+    
+
+    code = True
+    def switch():
+
+        print(code)
+
+        if code:
+            view = False
+            switch_but = tkinter.Button(win_start, text="off", command=lambda: switch())
+            switch_but.place(x=250, y=45)
+            win_start.update()
+        else:
+            code = True
+            switch_but = tkinter.Button(win_start, text="on", command=lambda: switch())
+            switch_but.place(x=250, y=45)
+            win_start.update()
+    
+    
+    
+    switch_lab = tkinter.Label(win_start, text="view mode :")
+    switch_lab.place(x=170, y=45)
+    switch_but = tkinter.Button(win_start, text="on", command=lambda: switch())
+    switch_but.place(x=250, y=45)
+
+
+
+
+
+
+    
+
 
     adds = info[0].rstrip().split("==")
-    os.mkdir(os.path.join(adds[1], "features"))
+    try:
+        os.mkdir(os.path.join(adds[1], "features"))
+    except:
+        print("")
     for i in os.listdir(adds[1]):
         if i[-3:].lower() == "jpg" or i[-3:].lower() == "png":
             image = cv2.imread(adds[1]+"\\"+i)
@@ -247,18 +295,38 @@ def start():
                     file.write(des_numpy + '\n')
             print(f"image {i} features extracted")
     
+    txt_list = []
+    for i in os.listdir(adds[1]+"\\"+"features"):
+        txt_list.append(i)
+    i = True
+    def stop():
+        i = False
+        return i 
+    while i:
+
+        id, frame = cam.read()
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        key, des = sift.detectAndCompute(frame_gray, None)
+        
+        highest_match[0] = 0
+        for i in txt_list:
+            info = np.loadtxt(adds[1]+"\\"+"features"+"\\"+i)
+            info = info.astype(np.float32)
+            matches = bf.match(info, des)
+            if len(matches) > highest_match[0]:
+                highest_match[0] = len(matches)
+                highest_match[1] = i
 
 
-
-    
-
-
-
-
-
-
-
-
+        image_hm = cv2.imread(adds[1]+"\\"+highest_match[1][:-4]+".jpg")
+        matcher = np.concatenate((frame, image_hm), axis=1)
+        
+        cv2.putText(matcher, f"image found: {highest_match[1][:-4]}.jpg", (750, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
+        cv2.putText(matcher, "camera", (300, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
+        
+        cv2.imshow("two image", matcher)
+        cv2.createButton('Button',stop)
+        cv2.waitKey(1)
 
 
 
