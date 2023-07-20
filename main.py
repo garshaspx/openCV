@@ -13,14 +13,6 @@
 
 
 
-
-  
-
-
-
-
-
-
 import cv2
 import os
 import numpy as np
@@ -29,17 +21,9 @@ from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 from getpass import getuser
-
-
-
-
-
-
-
-
-
-
-
+import pandas as pd
+from datetime import datetime
+from openpyxl import Workbook
 
 
 
@@ -108,7 +92,7 @@ except:
 
 
 #info = [library-address,  video-input]
-info = ["None", "None"]
+info = ["None", 0, "ON"]
 
 
 def library():
@@ -181,6 +165,7 @@ def library():
         kk = con_file.readlines()
         info[0] = kk[ac]
         tkinter.Label(win, text=f"library is now active : {info[0]}").pack()
+        lib_win.destroy()
         win.update()
     tkinter.Button(lib_win, text="add library", command=lambda : add_direc_txt()).place(x=40, y=220)
     tkinter.Button(lib_win, text="delete library", command=lambda: delete()).place(x=135, y=220)
@@ -219,58 +204,84 @@ def library():
 
 
 
-#"C:\\Users\\garshasp\\Pictures\\Camera Roll\\WIN_20230717_12_42_32_Pro.mp4"
 
+
+
+
+
+
+
+
+
+
+
+def time():
+    now = datetime.now()
+    time = now.strftime("%Y-%m-%d_%H:%M:%S")
+    return time
+
+
+#"C:\\Users\\garshasp\\Pictures\\Camera Roll\\WIN_20230717_12_42_32_Pro.mp4"
 
 def start():
     global info
-    
-    if info[0] == "None" or info[1] == "None":
-        print("FGN")
-        messagebox.showerror("error", "choose your library and input first")
+
+    if info[0] == "None":
+        messagebox.showerror("error", "choose your library before starting\n video input is webcam by default")
         return    
 
     win_start = tkinter.Tk()
     win_start.title("image matcher")
     win_start.geometry("300x140")    
-    tkinter.Label(win_start, text="start matching :").place(x=30, y=20)
-    tkinter.Button(win_start, text="start", command=lambda: start_match()).place(x=130, y=20)
-    tkinter.Label(win_start, text="stop matching :").place(x=30, y=90)
-    tkinter.Button(win_start, text="stop").place(x=130, y=90)
-    
-    code = "ON"
+    tkinter.Label(win_start, text="start matching :").place(x=10, y=20)
+    tkinter.Button(win_start, text="start", command=lambda: start_match()).place(x=100, y=20)
+    tkinter.Label(win_start, text="stop matching :   press Esc on your keyboard").place(x=10, y=90)
 
+    
     def switch():
-        nonlocal code
-        if code == "ON":
-            code = "OFF"
-            switch_but = tkinter.Button(win_start, text=code, command=lambda: switch())
+
+        if info[2] == "ON":
+            info[2] = "OFF"
+            switch_but = tkinter.Button(win_start, text=info[2], command=lambda: switch())
             switch_but.place(x=250, y=45)
             win_start.update()
         else:
-            code = "ON"
-            switch_but = tkinter.Button(win_start, text=code+" ", command=lambda: switch())
+            info[2] = "ON"
+            switch_but = tkinter.Button(win_start, text=info[2]+" ", command=lambda: switch())
             switch_but.place(x=250, y=45)
             win_start.update()
 
     switch_lab = tkinter.Label(win_start, text="view mode :")
     switch_lab.place(x=170, y=45)
-    switch_but = tkinter.Button(win_start, text=code, command=lambda: switch())
+    switch_but = tkinter.Button(win_start, text=info[2], command=lambda: switch())
     switch_but.place(x=250, y=45)
 
+    sheet = info[0].rstrip().split("==")[0]# + "_" + info[1]
+    
+    excel_address = "C:\\Users\\" + getuser() + "\\Documents\\datacenter.xlsx" #+ time() + sheet +".
+    df = pd.DataFrame(columns=["time", "image", "ID"])
+    
+    def save(img):    
+        if len(df.index) > 0 and df.loc[len(df.index)-1][1] == img :
+            return
+        df.loc[len(df.index)] = [time(), img, None]
+        with pd.ExcelWriter(excel_address, engine="auto") as excel:
+            df.to_excel(excel, sheet_name=sheet)
 
         
     def start_match():
+        
         global info
         adds = info[0].rstrip().split("==")
         try:
             os.mkdir(os.path.join(adds[1], "features"))
         except:
-            print("")
-            
+            None
+        
+        tkinter.Label(win_start, text="library is being procceesed..         ", fg="red").place(x=140, y=20)
+        win_start.update()
             
         sift = cv2.xfeatures2d.SIFT_create()    
-        
         for i in os.listdir(adds[1]):
             if i[-3:].lower() == "jpg" or i[-3:].lower() == "png":
                 image = cv2.imread(adds[1]+"\\"+i)
@@ -283,50 +294,49 @@ def start():
                         file.write(des_numpy + '\n')
                 print(f"image {i} features extracted")
         
+        tkinter.Label(win_start, text="library proccess finished          ", fg="blue").place(x=140, y=20)
+        win_start.update()
+        
+        
         txt_list = []
         for i in os.listdir(adds[1]+"\\"+"features"):
             txt_list.append(i)
-            
-
-
-        cam = cv2.VideoCapture(0)
+        
+        
+        if info[1] == "webcam":
+            cam = cv2.VideoCapture(0)
+        else:
+            cam = cv2.VideoCapture(info[1])
         bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
         highest_match = [0, 0]
 
         while True:
-
             id, frame = cam.read()
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             key, des = sift.detectAndCompute(frame_gray, None)
             
             highest_match[0] = 0
             for i in txt_list:
-                info = np.loadtxt(adds[1]+"\\"+"features"+"\\"+i)
-                info = info.astype(np.float32)
-                matches = bf.match(info, des)
+                info_mat = np.loadtxt(adds[1]+"\\"+"features"+"\\"+i)
+                info_mat = info_mat.astype(np.float32)
+                matches = bf.match(info_mat, des)
                 if len(matches) > highest_match[0]:
                     highest_match[0] = len(matches)
                     highest_match[1] = i
+            save(highest_match[1][:-4])
+            
+            if info[2] == "ON" :
 
-            image_hm = cv2.imread(adds[1]+"\\"+highest_match[1][:-4]+".jpg")
-            matcher = np.concatenate((frame, image_hm), axis=1)
-            
-            cv2.putText(matcher, f"image found: {highest_match[1][:-4]}.jpg", (750, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
-            cv2.putText(matcher, "camera", (300, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
-                        
-            cv2.imshow("two image", matcher)
-           
-            
+                image_hm = cv2.imread(adds[1]+"\\"+highest_match[1][:-4]+".jpg")
+                matcher = np.concatenate((frame, image_hm), axis=1)
+                cv2.putText(matcher, f"image found: {highest_match[1][:-4]}.jpg", (750, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
+                cv2.putText(matcher, "camera", (300, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)                    
+                cv2.imshow("two image", matcher)
+
+
             if cv2.waitKey(1) == 27:
                 cv2.destroyAllWindows()
                 break
-
-
-
-
-
-
-
 
 
 
@@ -358,40 +368,26 @@ def video():
     #fill the camera list 
     #add it
     
-    cam_chooser['values'] = (' webcam', ' cam 14', ' cam 32c')    
+    cam_chooser['values'] = ('webcam', 'cam_14', 'cam32c')    
     cam_chooser.place(x=150, y=10)
     cam_chooser.current(0)
     tkinter.Label(vid_win, text="choose a video : ").place(x=20, y=50)
-    tkinter.Button(vid_win, text="choose", command=lambda:video_loc()).place(x=200, y=50)    
-    tkinter.Button(vid_win, text="save", fg="red", command=lambda:save()).place(x=270, y=80)
+    tkinter.Button(vid_win, text="choose", command=lambda:video_loc()).place(x=180, y=50)    
+    tkinter.Button(vid_win, text="save", fg="red", command=lambda:save()).place(x=270, y=50)
 
     def video_loc():
         info[1] = filedialog.askopenfilename()    
         win.bind('<FocusIn>', win.lower())
         if info[1][-3:] == "mp4":
             tkinter.Label(win, text=info).pack()
-            win.update()
             vid_win.destroy()
         else:
             messagebox.showerror("file type", "make sure the file you choose is a mp4")
+    
     def save():
         info[1] = cam_chooser.get()
         vid_win.destroy()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        win.update()
 
 
 
@@ -439,6 +435,21 @@ def starxnxfnt():
         index += 1
         i -= 1
     print(arr)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
