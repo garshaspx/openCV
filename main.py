@@ -24,10 +24,7 @@ from getpass import getuser
 import pandas as pd
 from datetime import datetime
 from openpyxl import Workbook
-
-
-
-
+from PIL import Image, ImageTk
 
 
 
@@ -49,9 +46,8 @@ from openpyxl import Workbook
 
 win = tkinter.Tk()
 win.title("image processor")
-win.geometry("450x270")
+win.geometry("400x290")
 
-labe_intro = tkinter.Label(text="wellcome").pack()
 file_adress = "C:\\Users\\"+getuser()+"\Documents\data.txt"
 
 try:
@@ -91,9 +87,35 @@ except:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #info = [library-address,  video-input]
 info = ["None", 0, "ON"]
-
 
 def library():
     global info
@@ -164,16 +186,21 @@ def library():
         con_file = open(file_adress, "r")
         kk = con_file.readlines()
         info[0] = kk[ac]
-        tkinter.Label(win, text=f"library is now active : {info[0]}").pack()
         lib_win.destroy()
-        win.update()
     tkinter.Button(lib_win, text="add library", command=lambda : add_direc_txt()).place(x=40, y=220)
     tkinter.Button(lib_win, text="delete library", command=lambda: delete()).place(x=135, y=220)
     tkinter.Button(lib_win, text="active library", command=lambda: active()).place(x=240, y=220)
 
 
 
-    
+
+
+
+
+
+
+
+
 
 
 
@@ -221,9 +248,77 @@ def time():
     return time
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #"C:\\Users\\garshasp\\Pictures\\Camera Roll\\WIN_20230717_12_42_32_Pro.mp4"
 
 def start():
+    
     global info
 
     if info[0] == "None":
@@ -358,6 +453,60 @@ def start():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def video():
     vid_win = tkinter.Tk()
     vid_win.title("choose video input")
@@ -379,7 +528,6 @@ def video():
         info[1] = filedialog.askopenfilename()    
         win.bind('<FocusIn>', win.lower())
         if info[1][-3:] == "mp4":
-            tkinter.Label(win, text=info).pack()
             vid_win.destroy()
         else:
             messagebox.showerror("file type", "make sure the file you choose is a mp4")
@@ -387,7 +535,37 @@ def video():
     def save():
         info[1] = cam_chooser.get()
         vid_win.destroy()
-        win.update()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -461,9 +639,83 @@ def starxnxfnt():
 
 
 
-tkinter.Button(win, text="start", command= lambda : start()).pack()
-tkinter.Button(win, text="choose input", command=lambda: video()).pack()
-tkinter.Button(win, text="library manager", command= lambda : library()).pack()
-tkinter.Button(win, text="setting", command= lambda : setting()).pack()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+label = tkinter.Label(win)
+label.place(x=-60, y=-30)
+image = Image.open(os.getcwd()+"\\item_detec.gif")
+frames = []
+try:
+    while True:
+        frames.append(ImageTk.PhotoImage(image))
+        image.seek(len(frames))
+except EOFError:
+    pass
+def update_frame(frame_index):
+    label.config(image=frames[frame_index])
+    win.after(100, update_frame, (frame_index + 1) % len(frames))
+update_frame(0)
+
+labe_intro = tkinter.Label(text="wellcome").place(x=190, y=10)
+tkinter.Button(win, text="start", command= lambda : start(), fg="blue").place(x=10, y=60)
+tkinter.Button(win, text="choose input", command=lambda: video()).place(x=10, y=95)
+tkinter.Button(win, text="library manager", command= lambda : library()).place(x=10, y=130)
+tkinter.Button(win, text="setting", command= lambda : setting()).place(x=10, y=165)
+tkinter.Button(win, text="close", command= lambda : quit(), fg="red").place(x=10, y=200)
+
+
+
 
 win.mainloop()
