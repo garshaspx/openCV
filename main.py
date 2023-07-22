@@ -47,6 +47,9 @@ from PIL import Image, ImageTk
 win = tkinter.Tk()
 win.title("image processor")
 win.geometry("400x290")
+win.resizable(width=False, height=False)
+
+win.iconphoto(False, tkinter.PhotoImage(file = os.getcwd() + '\\icon.png'))
 
 file_adress = "C:\\Users\\"+getuser()+"\Documents\data.txt"
 
@@ -54,20 +57,6 @@ try:
     open(file_adress).close()
 except:
     open(file_adress, "w+")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -244,13 +233,8 @@ def library():
 
 def time():
     now = datetime.now()
-    time = now.strftime("%Y-%m-%d_%H:%M:%S")
+    time = now.strftime("%Y_%m_%d_%H_%M_%S")
     return time
-
-
-
-
-
 
 
 
@@ -353,7 +337,7 @@ def start():
 
     sheet = info[0].rstrip().split("==")[0]# + "_" + info[1]
     
-    excel_address = "C:\\Users\\" + getuser() + "\\Documents\\datacenter.xlsx" #+ time() + sheet +".
+    excel_address = "C:\\Users\\" + getuser() + "\\Documents\\"+str(info[0])+str(info[1])+time()+".xlsx" #+ time() + sheet +".
     df = pd.DataFrame(columns=["time", "image", "ID"])
     
     def save(img):    
@@ -405,6 +389,13 @@ def start():
         bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
         highest_match = [0, 0]
 
+
+
+
+
+
+
+
         while True:
             id, frame = cam.read()
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -432,28 +423,6 @@ def start():
             if cv2.waitKey(1) == 27:
                 cv2.destroyAllWindows()
                 break
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -551,46 +520,6 @@ def video():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def setting():
     S_win = tkinter.Tk()
     S_win.title("setting")
@@ -613,63 +542,6 @@ def starxnxfnt():
         index += 1
         i -= 1
     print(arr)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
