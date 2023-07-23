@@ -28,7 +28,19 @@ from PIL import Image, ImageTk
 
 
 
-
+"""
+from cv2 import VideoCapture, cvtColor, imread, convertScaleAbs, COLOR_BGR2GRAY, NORM_L1, BFMatcher, FONT_HERSHEY_PLAIN, imshow, waitKey, destroyAllWindows, xfeatures2d, putText
+from os import getcwd, listdir, mkdir, path
+from numpy import concatenate, loadtxt, float32
+from tkinter import Tk, PhotoImage, Label, Button, Entry, StringVar
+from tkinter.filedialog import askdirectory, askopenfilename
+from tkinter.ttk import Treeview, Scrollbar, Combobox
+from tkinter.messagebox import showerror
+from getpass import getuser
+from pandas import ExcelWriter, DataFrame
+from datetime import datetime
+from PIL import Image, ImageTk
+"""
 
 
 
@@ -65,7 +77,7 @@ from PIL import Image, ImageTk
 
 
 index = 0
-arr = ["hi"]
+arr = []
 while True:
     cap = cv2.VideoCapture(index)
     if not cap.read()[0]:
@@ -573,9 +585,11 @@ def video():
 
 
 def setting():
-    S_win = tkinter.Tk()
-    S_win.title("setting")
-    S_win.geometry("300x150")    
+    s_win = tkinter.Tk()
+    s_win.title("setting")
+    s_win.geometry("300x150") 
+    
+    tkinter.Label(s_win, text="options will be coming soon", fg="red").pack()
     """
     add setting to choose camera and other stuff
     """    
