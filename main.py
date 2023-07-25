@@ -13,6 +13,13 @@
 
 
 
+
+
+
+
+
+
+
 import cv2
 import os
 import numpy as np
@@ -24,6 +31,11 @@ from getpass import getuser
 import pandas as pd
 from datetime import datetime
 from PIL import Image, ImageTk
+
+
+
+
+
 
 
 
@@ -41,24 +53,6 @@ from pandas import ExcelWriter, DataFrame
 from datetime import datetime
 from PIL import Image, ImageTk
 """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -116,32 +110,16 @@ except:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def time():
     now = datetime.now()
     time = now.strftime("%Y_%m_%d_%H_%M_%S")
     return time
+
+
+
+
+
+
 
 
 
@@ -245,56 +223,6 @@ def library():
     tkinter.Button(lib_win, text="add library", command=lambda : add_direc_txt()).place(x=40, y=220)
     tkinter.Button(lib_win, text="delete library", command=lambda: delete()).place(x=135, y=220)
     tkinter.Button(lib_win, text="active library", command=lambda: active()).place(x=240, y=220)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -496,6 +424,11 @@ def start():
 
 
 
+
+
+
+
+
 def video():
     vid_win = tkinter.Tk()
     vid_win.title("choose video input")
@@ -577,13 +510,6 @@ def video():
 
 
 
-
-
-
-
-
-
-
 def setting():
     s_win = tkinter.Tk()
     s_win.title("setting")
@@ -594,18 +520,6 @@ def setting():
     add setting to choose camera and other stuff
     """    
     print("setting opened")
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
