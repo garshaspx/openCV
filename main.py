@@ -16,10 +16,6 @@
 
 
 
-
-
-
-
 import cv2
 import os
 import numpy as np
@@ -61,15 +57,6 @@ from PIL import Image, ImageTk
 
 
 
-
-
-
-
-
-
-
-
-
 index = 0
 arr = []
 while True:
@@ -87,7 +74,6 @@ win.geometry("400x290")
 win.resizable(width=False, height=False)
 
 win.iconphoto(False, tkinter.PhotoImage(file = os.getcwd() + '\\icon.png'))
-
 file_adress = "C:\\Users\\"+getuser()+"\Documents\data.txt"
 
 try:
@@ -339,12 +325,17 @@ def start():
                 print(f"image {i} features extracted")
         tkinter.Label(win_start, text="library proccess finished          ", fg="blue").place(x=140, y=20)
         win_start.update()
-        
+        set
         txt_list = []
         for i in os.listdir(adds[1]+"\\"+"features"):
             txt_list.append(i)
         if info[1] == "webcam" or "0":
             cam = cv2.VideoCapture(0)
+            
+            #cam res set
+            cam.set(3, 640)
+            cam.set(4, 480)
+            
         else:
             print(info[1])
             cam = cv2.VideoCapture(info[1])
