@@ -243,23 +243,6 @@ def library():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def start():
     global info
     if info[0] == "None":
@@ -397,29 +380,6 @@ def start():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def video():
     vid_win = tkinter.Tk()
     vid_win.title("choose video input")
@@ -469,38 +429,6 @@ def video():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def setting():
     s_win = tkinter.Tk()
     s_win.title("setting")
@@ -511,20 +439,6 @@ def setting():
     add setting to choose camera and other stuff
     """    
     print("setting opened")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

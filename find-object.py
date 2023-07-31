@@ -42,19 +42,14 @@ while True:
 
         if max_val > threshold :
             cv2.rectangle(camera, max_loc, bottom_right, 255, 2)
-            #cv2.putText(camera, "str(temp_name[i])", (max_loc, bottom_right), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
-            cv2.putText(camera, str(temp_name[list_temp.index(i)]), (max_loc[0], max_loc[1]-10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 2)   
+
+            cv2.putText(camera, str(temp_name[list_temp.index(i)]), (max_loc[0], max_loc[1]-10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 250, 0), 2)   
 
     cv2.imshow("machted", camera)
     cv2.waitKey(10)
-    
 
 
-
-
-
-
-"""
+    """
     #expkain thos code cv2.findNonZero(result, threshold)
     #thresholded_result = cv2.threshold(result, threshold, 1, cv2.THRESH_BINARY)
     result_normalized = cv2.normalize(result, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
