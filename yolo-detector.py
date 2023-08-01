@@ -1,7 +1,7 @@
 from ultralytics import YOLO
 import cv2
 
-model = YOLO("yolov8m.pt")
+model = YOLO("C:\\Users\\garshasp\\Documents\\GitHub\\openCV\\runs\\detect\\train2\\weights\\best.pt")
 cam = cv2.VideoCapture(0)
 
 #address = "cat_dog1.jpg"

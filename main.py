@@ -14,8 +14,6 @@
 
 
 
-
-
 import cv2
 import os
 import numpy as np
@@ -73,7 +71,7 @@ win.title("image processor")
 win.geometry("400x290")
 win.resizable(width=False, height=False)
 
-win.iconphoto(False, tkinter.PhotoImage(file = os.getcwd() + '\\icon.png'))
+win.iconphoto(False, tkinter.PhotoImage(file = os.getcwd() + '\\media\\icon.png'))
 file_adress = "C:\\Users\\"+getuser()+"\Documents\data.txt"
 
 try:
@@ -475,7 +473,7 @@ def setting():
 
 label = tkinter.Label(win)
 label.place(x=-60, y=-30)
-image = Image.open(os.getcwd()+"\\item_detec.gif")
+image = Image.open(os.getcwd()+"\\media\\item_detec.gif")
 frames = []
 try:
     while True:
