@@ -4,15 +4,11 @@ import cv2
 model = YOLO("C:\\Users\\garshasp\\Documents\\GitHub\\openCV\\runs\\detect\\train2\\weights\\best.pt")
 cam = cv2.VideoCapture(0)
 
-#address = "cat_dog1.jpg"
-
 while True:
     
     id, image = cam.read()
     results = model.predict(image)
     result = results[0]
-
-    #image = cv2.imread(address)
 
     for box in result.boxes:
 
@@ -28,17 +24,7 @@ while True:
         print("Coordinates:", cords)
         print("Probability:", conf)
 
-
-    #print(result.names)
-
-    """
-    from PIL import Image
-    Image.fromarray(result.plot()[:,:,::-1])"""
-
-
-
-    cv2.imshow("test", image)
-    
+    cv2.imshow("test", image)    
     if cv2.waitKey(10) == 27:
         cv2.destroyAllWindows()
         break
