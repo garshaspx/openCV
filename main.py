@@ -138,7 +138,8 @@ def library():
     global info
     lib_win = tkinter.Tk()
     lib_win.title("library manager")
-    lib_win.geometry("410x260")    
+    lib_win.geometry("410x260")
+    lib_win.resizable(width=False, height=False)
     tv = ttk.Treeview(lib_win, columns="number", height=9)
     tv.place(x=0, y=0)
     tv.heading("#0", text="Name")
@@ -160,6 +161,7 @@ def library():
         new_library_win = tkinter.Tk()
         new_library_win.title("new library")
         new_library_win.geometry("370x100")
+        new_library_win.resizable(width=False, height=False)
         tkinter.Label(new_library_win, text="enter information for new library :").grid(row=0, column=1)
         tkinter.Label(new_library_win, text="enter name :").grid(row=1, column=0)
         tkinter.Label(new_library_win, text="choose address :").grid(row=2, column=0)
@@ -248,7 +250,8 @@ def start():
         return    
     win_start = tkinter.Tk()
     win_start.title("image matcher")
-    win_start.geometry("300x140")    
+    win_start.geometry("300x140")
+    win.resizable(width=False, height=False)
     tkinter.Label(win_start, text="start matching :").place(x=10, y=20)
     tkinter.Button(win_start, text="start", command=lambda: start_match()).place(x=100, y=20)
     tkinter.Label(win_start, text="stop matching :   press Esc on your keyboard").place(x=10, y=90)
@@ -382,6 +385,7 @@ def video():
     vid_win = tkinter.Tk()
     vid_win.title("choose video input")
     vid_win.geometry("320x110")
+    vid_win.resizable(width=False, height=False)
     tkinter.Label(vid_win, text="choose a camera : ").place(x=20, y=10)
     cam_chooser = ttk.Combobox(vid_win, width = 20, textvariable = tkinter.StringVar())
 
@@ -431,7 +435,7 @@ def setting():
     s_win = tkinter.Tk()
     s_win.title("setting")
     s_win.geometry("300x150") 
-    
+    s_win.resizable(width=False, height=False)
     tkinter.Label(s_win, text="options will be coming soon", fg="red").pack()
     """
     add setting to choose camera and other stuff
