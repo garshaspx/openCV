@@ -3,82 +3,59 @@ import sqlite3
 from datetime import datetime
 from ultralytics import YOLO
 
+def time():
+    now = datetime.now()
+    return now.strftime("%Y_%m_%d_%H_%M_%S")
+    
 
-
-
-model = YOLO('C:\\Users\\garshasp\\Documents\\best_card_metro_8m.pt')
+model = YOLO('C:\\Users\\garshasp\\Documents\\yolov8m.pt')
 threshold = 0.7
 cap = cv2.VideoCapture(0)
-
 
 
 try:
     connection = sqlite3.connect('C:\\Users\\garshasp\\Documents\\data_center.db')
 except:
-    pass
-try:
-    connection.execute(''' CREATE TABLE hotel
-            (code INT PRIMARY KEY     NOT NULL,
-            name           TEXT    NOT NULL,
-            conf            INT     NOT NULL,
-            cord        INT,
-            time        TEXT);
-            ''')
-except:
-    pass
+    print("db already exists")
 
-
-
-def time():
-    now = datetime.now()
-    time = now.strftime("%Y_%m_%d_%H_%M_%S")
-    return time
-
-
+start_time = time()
+connection.execute(f''' CREATE TABLE \"{start_time}\"
+        (code INT PRIMARY KEY     NOT NULL,
+        name           TEXT    NOT NULL,
+        conf            INT     NOT NULL,
+        cord        INT,
+        time        TEXT);
+        ''')
 
 
 while True:
-
-    id, frame = cap.read()
-    results = model.track(frame, persist=True, conf=threshold) #  save_txt=True save data in txt
+    _, frame = cap.read()
+    view = frame
+    results = model.track(view, persist=True, conf=threshold) #  save_txt=True save data in txt
     result = results[0]
-
+    class_id_dict = {}
     for box in result.boxes:
-        print("gffffffffffffff")
-        print(box)
-        print("gffffffffffffff")
+        
         class_id = result.names[box.cls[0].item()]
         cords = box.xyxy[0].tolist()
         cords = [round(x) for x in cords]
         conf = round(box.conf[0].item(), 2)
+        id_item = box.cls[0].item()
         
-
-            
         if conf >= threshold:
-            frame = results[0].plot()
-            try:
+            
+            view = results[0].plot()
+            try:    
                 idd = box.id[0].item()
-            except:
-                pass
-            try:
-                connection.execute(f"INSERT INTO hotel VALUES ({idd}, \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")
+                connection.execute(f"INSERT INTO \"{start_time}\" VALUES ({idd}, \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")
                 connection.commit()
+                cv2.imwrite(f"C:\\Users\\garshasp\\Documents\\data_machine\\train\\images\\{time()}_{class_id}.jpg", frame)
+                open(f"C:\\Users\\garshasp\\Documents\\data_machine\\train\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
             except:
-                pass
-        print("Object type:", class_id)
-        print("Coordinates:", cords)
-        print("Probability:", conf)
-        print("id : ", idd)
-        
-
-        
-        
-        
-    cv2.imshow("item Tracker", frame)        
+                print("id wasnt given, or already exists")
+                
+    cv2.imshow("item Tracker", view)        
     
     if cv2.waitKey(1) == 27 :
         cv2.destroyAllWindows()
         break
-
-
-

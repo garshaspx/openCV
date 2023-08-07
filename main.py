@@ -1,36 +1,30 @@
 # amirhosein heidari
 # 
 # feature extacter
-# item detector 
+# item detector
 # item tracker
 # gui interface
 # stores data
-# 
+# uses machine learning to learn data of image
 # 
 #
 
 
 
 
-
-
 import cv2
 import os
-import numpy as np
+
 import tkinter
+import sqlite3
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 from getpass import getuser
-import pandas as pd
+
+from ultralytics import YOLO
 from datetime import datetime
 from PIL import Image, ImageTk
-
-
-
-
-
-
 
 
 
@@ -47,11 +41,6 @@ from pandas import ExcelWriter, DataFrame
 from datetime import datetime
 from PIL import Image, ImageTk
 """
-
-
-
-
-
 
 
 
@@ -72,26 +61,7 @@ win.geometry("400x290")
 win.resizable(width=False, height=False)
 
 win.iconphoto(False, tkinter.PhotoImage(file = os.getcwd() + '\\media\\icon.png'))
-file_adress = "C:\\Users\\"+getuser()+"\Documents\data.txt"
-
-try:
-    open(file_adress).close()
-except:
-    open(file_adress, "w+")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+file_adress = "C:\\Users\\"+getuser()+"\\Documents\\data.txt"
 
 
 def time():
@@ -99,6 +69,27 @@ def time():
     time = now.strftime("%Y_%m_%d_%H_%M_%S")
     return time
 
+
+try:
+    connection = sqlite3.connect('C:\\Users\\garshasp\\Documents\\data_center.db')
+except:
+    print("db already exists")
+
+
+
+# chang txt to sql
+# connection.execute(f''' CREATE TABLE DBaddress
+#         (code TEXT PRIMARY KEY     NOT NULL,
+#         address            INT     NOT NULL);
+#          ''')
+
+
+
+
+try:
+    open(file_adress).close()
+except:
+    open(file_adress, "w+")
 
 
 
@@ -135,6 +126,7 @@ def time():
 info = ["None", 0, "ON"]
 
 def library():
+    
     global info
     lib_win = tkinter.Tk()
     lib_win.title("library manager")
@@ -148,6 +140,7 @@ def library():
     tv.column('number', width=300)
     verscrlbar = ttk.Scrollbar(lib_win, command = tv.yview) 
     verscrlbar.place(x=390, y=0, height=206)
+    
     def refresh_lib():
         for i in tv.get_children():     
             tv.delete(i)            
@@ -156,7 +149,9 @@ def library():
             temp = address.rstrip().split("==")
             tv.insert('', "end", iid = name, text = temp[0], values = temp[1]) 
         lib_win.update()
+    
     refresh_lib()
+    
     def add_direc_txt():
         new_library_win = tkinter.Tk()
         new_library_win.title("new library")
@@ -169,59 +164,61 @@ def library():
         name_entry.grid(row=1, column=1)
         tkinter.Button(new_library_win, text="choose:", command=lambda : choose_direc()).grid(row=2, column=1) 
         address = "----"
+    
         def choose_direc():
             nonlocal address
-            address = filedialog.askdirectory()
+            file = filedialog.askopenfile(mode='r', filetypes=[('db Files', '*.db')])
+
+            if file:
+                address = os.path.abspath(file.name)
+            print(address)
             #tkinter.Label(new_library_win, text= f"chosen library is: {address}").grid(row=2, column=3)
             win.bind('<FocusIn>', win.lower())
+    
         def save():
             nonlocal address
+            
             con_file = open(file_adress, "a")
             con_file.write(f"{name_entry.get()}=={address}\n")
             con_file.close()
+            
             refresh_lib()
             new_library_win.destroy()
             win.bind('<FocusIn>', win.lower())
         tkinter.Button(new_library_win, text="save new data", command= lambda : save()).grid(row=3, column=3)
+    
     def delete():
         con_list = []
         con_file = open(file_adress, "r+")
+    
         try:
             x = tv.focus()
             int(x)
         except:
             return
+    
         for index, i in enumerate(con_file):
             contact = i.rstrip()
             con_list.append(contact)
         con_file = open(file_adress, "w+")
         con_list.pop(int(x))
+    
         for i in con_list:
             con_file.write(i+"\n")
         con_file.close()
+    
         refresh_lib()
+    
     def active():
         ac = int(tv.focus())
         con_file = open(file_adress, "r")
         kk = con_file.readlines()
         info[0] = kk[ac]
         lib_win.destroy()
+    
     tkinter.Button(lib_win, text="add library", command=lambda : add_direc_txt()).place(x=40, y=220)
     tkinter.Button(lib_win, text="delete library", command=lambda: delete()).place(x=135, y=220)
     tkinter.Button(lib_win, text="active library", command=lambda: active()).place(x=240, y=220)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -272,79 +269,54 @@ def start():
     switch_lab.place(x=170, y=45)
     switch_but = tkinter.Button(win_start, text=info[2], command=lambda: switch())
     switch_but.place(x=250, y=45)
-    
-    lib_name =info[0].rstrip().split("==")[0]
-    
-    excel_address = "C:\\Users\\" + getuser() + "\\Documents\\"+lib_name+"--"+time()+".xlsx"
-    df = pd.DataFrame(columns=["time", "image", "ID"])
-
-    def save(img):    
-        if len(df.index) > 0 and df.loc[len(df.index)-1][1] == img :
-            return
-        df.loc[len(df.index)] = [time(), img, None]
-        with pd.ExcelWriter(excel_address, engine="auto") as excel:
-            df.to_excel(excel, sheet_name=lib_name)
-
+        
+        
+    model = YOLO('C:\\Users\\garshasp\\Documents\\yolov8m.pt')
+    threshold = 0.7  #add threshold option
+    cap = cv2.VideoCapture(0)
+            
         
     def start_match():        
         global info
         adds = info[0].rstrip().split("==")
-        try:
-            os.mkdir(os.path.join(adds[1], "features"))
-        except:
-            None
-        tkinter.Label(win_start, text="library is being procceesed..         ", fg="red").place(x=140, y=20)
-        win_start.update()
-        sift = cv2.xfeatures2d.SIFT_create()
-        for i in os.listdir(adds[1]):
-            if i[-3:].lower() == "jpg" or i[-3:].lower() == "png":
-                image = cv2.imread(adds[1]+"\\"+i)
-                image = cv2.convertScaleAbs(image)
-                BW_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                keypoints, descriptors = sift.detectAndCompute(BW_image, None)
-                with open(adds[1]+"\\"+"features\\"+i[0:-4]+".txt", "w") as file:
-                    for j in descriptors:
-                        des_numpy = ' '.join(str(value) for value in j)
-                        file.write(des_numpy + '\n')
-                print(f"image {i} features extracted")
-        tkinter.Label(win_start, text="library proccess finished          ", fg="blue").place(x=140, y=20)
-        win_start.update()
-        set
-        txt_list = []
-        for i in os.listdir(adds[1]+"\\"+"features"):
-            txt_list.append(i)
-        if info[1] == "webcam" or "0":
-            cam = cv2.VideoCapture(0)
-            
-            #cam res set
-            cam.set(3, 640)
-            cam.set(4, 480)
-            
-        else:
-            print(info[1])
-            cam = cv2.VideoCapture(info[1])
-        bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
-        highest_match = [0, 0]
+
+        start_time = time()
+        connection.execute(f''' CREATE TABLE \"{start_time}\"
+                (code INT PRIMARY KEY     NOT NULL,
+                name           TEXT    NOT NULL,
+                conf            INT     NOT NULL,
+                cord        INT,
+                time        TEXT);
+                ''')
+
         while True:
-            id, frame = cam.read()
-            frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            key, des = sift.detectAndCompute(frame_gray, None)            
-            highest_match[0] = 0
-            for i in txt_list:
-                info_mat = np.loadtxt(adds[1]+"\\"+"features"+"\\"+i)
-                info_mat = info_mat.astype(np.float32)
-                matches = bf.match(info_mat, des)
-                if len(matches) > highest_match[0]:
-                    highest_match[0] = len(matches)
-                    highest_match[1] = i
-            save(highest_match[1][:-4])
-            if info[2] == "ON" :
-                image_hm = cv2.imread(adds[1]+"\\"+highest_match[1][:-4]+".jpg")
-                matcher = np.concatenate((frame, image_hm), axis=1)
-                cv2.putText(matcher, f"image found: {highest_match[1][:-4]}.jpg", (750, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
-                cv2.putText(matcher, "camera", (300, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)                    
-                cv2.imshow("two image", matcher)
-            if cv2.waitKey(1) == 27:
+            _, frame = cap.read()
+            view = frame
+            results = model.track(view, persist=True, conf=threshold) #  save_txt=True save data in txt
+            result = results[0]
+            for box in result.boxes:
+                
+                class_id = result.names[box.cls[0].item()]
+                cords = box.xyxy[0].tolist()
+                cords = [round(x) for x in cords]
+                conf = round(box.conf[0].item(), 2)
+                id_item = box.cls[0].item()
+                
+                if conf >= threshold:
+                    
+                    view = results[0].plot()
+                    try:    
+                        idd = box.id[0].item()
+                        connection.execute(f"INSERT INTO \"{start_time}\" VALUES ({idd}, \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")
+                        connection.commit()
+                        cv2.imwrite(f"C:\\Users\\garshasp\\Documents\\data_machine\\train\\images\\{time()}_{class_id}.jpg", frame)
+                        open(f"C:\\Users\\garshasp\\Documents\\data_machine\\train\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                    except:
+                        print("id wasnt given, or already exists")
+                        
+            cv2.imshow("item Tracker", view)        
+            
+            if cv2.waitKey(1) == 27 :
                 cv2.destroyAllWindows()
                 break
 
@@ -359,6 +331,99 @@ def start():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        # try:
+        #     os.mkdir(os.path.join(adds[1], "features"))
+        # except:
+        #     pass
+        # tkinter.Label(win_start, text="library is being procceesed..         ", fg="red").place(x=140, y=20)
+        # win_start.update()
+        # sift = cv2.xfeatures2d.SIFT_create()
+        # for i in os.listdir(adds[1]):
+        #     if i[-3:].lower() == "jpg" or i[-3:].lower() == "png":
+        #         image = cv2.imread(adds[1]+"\\"+i)
+        #         image = cv2.convertScaleAbs(image)
+        #         BW_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        #         keypoints, descriptors = sift.detectAndCompute(BW_image, None)
+        #         with open(adds[1]+"\\"+"features\\"+i[0:-4]+".txt", "w") as file:
+        #             for j in descriptors:
+        #                 des_numpy = ' '.join(str(value) for value in j)
+        #                 file.write(des_numpy + '\n')
+        #         print(f"image {i} features extracted")
+        # tkinter.Label(win_start, text="library proccess finished          ", fg="blue").place(x=140, y=20)
+        # win_start.update()
+
+        # txt_list = []
+        # for i in os.listdir(adds[1]+"\\"+"features"):
+        #     txt_list.append(i)
+        # if info[1] == "webcam" or "0":
+        #     cam = cv2.VideoCapture(0)
+            
+        #     #cam res set
+        #     cam.set(3, 640)
+        #     cam.set(4, 480)
+            
+        # else:
+        #     print(info[1])
+        #     cam = cv2.VideoCapture(info[1])
+        # bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
+        # highest_match = [0, 0]
+        # while True:
+        #     id, frame = cam.read()
+        #     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        #     key, des = sift.detectAndCompute(frame_gray, None)            
+        #     highest_match[0] = 0
+        #     for i in txt_list:
+        #         info_mat = np.loadtxt(adds[1]+"\\"+"features"+"\\"+i)
+        #         info_mat = info_mat.astype(np.float32)
+        #         matches = bf.match(info_mat, des)
+        #         if len(matches) > highest_match[0]:
+        #             highest_match[0] = len(matches)
+        #             highest_match[1] = i
+        #     save(highest_match[1][:-4])
+        #     if info[2] == "ON" :
+        #         image_hm = cv2.imread(adds[1]+"\\"+highest_match[1][:-4]+".jpg")
+        #         matcher = np.concatenate((frame, image_hm), axis=1)
+        #         cv2.putText(matcher, f"image found: {highest_match[1][:-4]}.jpg", (750, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
+        #         cv2.putText(matcher, "camera", (300, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)                    
+        #         cv2.imshow("two image", matcher)
+        #     if cv2.waitKey(1) == 27:
+        #         cv2.destroyAllWindows()
+        #         break
 
 
 
@@ -462,19 +527,6 @@ def setting():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 label = tkinter.Label(win)
 label.place(x=-60, y=-30)
 image = Image.open(os.getcwd()+"\\media\\item_detec.gif")
@@ -485,10 +537,13 @@ try:
         image.seek(len(frames))
 except EOFError:
     pass
+
 def update_frame(frame_index):
     label.config(image=frames[frame_index])
     win.after(100, update_frame, (frame_index + 1) % len(frames))
 update_frame(0)
+
+
 
 labe_intro = tkinter.Label(text="wellcome").place(x=190, y=10)
 tkinter.Button(win, text="start", command= lambda : start(), fg="blue").place(x=10, y=60)
@@ -496,5 +551,8 @@ tkinter.Button(win, text="choose input", command=lambda: video()).place(x=10, y=
 tkinter.Button(win, text="library manager", command= lambda : library()).place(x=10, y=130)
 tkinter.Button(win, text="setting", command= lambda : setting()).place(x=10, y=165)
 tkinter.Button(win, text="close", command= lambda : quit(), fg="red").place(x=10, y=200)
+
+
+
 
 win.mainloop()
