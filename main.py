@@ -14,33 +14,30 @@
 
 import cv2
 import os
-
 import tkinter
 import sqlite3
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 from getpass import getuser
-
 from ultralytics import YOLO
 from datetime import datetime
 from PIL import Image, ImageTk
 
 
 
-"""
-from cv2 import VideoCapture, cvtColor, imread, convertScaleAbs, COLOR_BGR2GRAY, NORM_L1, BFMatcher, FONT_HERSHEY_PLAIN, imshow, waitKey, destroyAllWindows, xfeatures2d, putText
-from os import getcwd, listdir, mkdir, path
-from numpy import concatenate, loadtxt, float32
-from tkinter import Tk, PhotoImage, Label, Button, Entry, StringVar
-from tkinter.filedialog import askdirectory, askopenfilename
-from tkinter.ttk import Treeview, Scrollbar, Combobox
-from tkinter.messagebox import showerror
-from getpass import getuser
-from pandas import ExcelWriter, DataFrame
-from datetime import datetime
-from PIL import Image, ImageTk
-"""
+
+# from cv2 import VideoCapture, cvtColor, imread, convertScaleAbs, COLOR_BGR2GRAY, NORM_L1, BFMatcher, FONT_HERSHEY_PLAIN, imshow, waitKey, destroyAllWindows, xfeatures2d, putText
+# from os import getcwd, listdir, mkdir, path
+# from numpy import concatenate, loadtxt, float32
+# from tkinter import Tk, PhotoImage, Label, Button, Entry, StringVar
+# from tkinter.filedialog import askdirectory, askopenfilename
+# from tkinter.ttk import Treeview, Scrollbar, Combobox
+# from tkinter.messagebox import showerror
+# from getpass import getuser
+# from pandas import ExcelWriter, DataFrame
+# from datetime import datetime
+# from PIL import Image, ImageTk
 
 
 
@@ -55,11 +52,11 @@ while True:
     cap.release()
     index += 1
 
+
 win = tkinter.Tk()
 win.title("image processor")
 win.geometry("400x290")
 win.resizable(width=False, height=False)
-
 win.iconphoto(False, tkinter.PhotoImage(file = os.getcwd() + '\\media\\icon.png'))
 file_adress = "C:\\Users\\"+getuser()+"\\Documents\\data.txt"
 
@@ -83,8 +80,11 @@ except:
 #         address            INT     NOT NULL);
 #          ''')
 
-
-
+"""
+connection.execute(f''' CREATE TABLE setting
+        (pt TEXT PRIMARY KEY     NOT NULL,
+        input            INT     NOT NULL);
+        ''')"""
 
 try:
     open(file_adress).close()
@@ -167,7 +167,7 @@ def library():
     
         def choose_direc():
             nonlocal address
-            file = filedialog.askopenfile(mode='r', filetypes=[('db Files', '*.db')])
+            file = filedialog.askopenfile(mode='r', filetypes=[('data Files', '*.pt')])
 
             if file:
                 address = os.path.abspath(file.name)
@@ -248,6 +248,7 @@ def start():
     win_start = tkinter.Tk()
     win_start.title("image matcher")
     win_start.geometry("300x140")
+    win_start.state("normal")
     win.resizable(width=False, height=False)
     tkinter.Label(win_start, text="start matching :").place(x=10, y=20)
     tkinter.Button(win_start, text="start", command=lambda: start_match()).place(x=100, y=20)
@@ -270,15 +271,16 @@ def start():
     switch_but = tkinter.Button(win_start, text=info[2], command=lambda: switch())
     switch_but.place(x=250, y=45)
         
-        
-    model = YOLO('C:\\Users\\garshasp\\Documents\\yolov8m.pt')
+    adds = info[0].rstrip().split("==")
+    model = YOLO(adds[1])
     threshold = 0.7  #add threshold option
     cap = cv2.VideoCapture(0)
             
         
+        
     def start_match():        
         global info
-        adds = info[0].rstrip().split("==")
+        
 
         start_time = time()
         connection.execute(f''' CREATE TABLE \"{start_time}\"
@@ -315,27 +317,14 @@ def start():
                         print("id wasnt given, or already exists")
                         
             cv2.imshow("item Tracker", view)        
+
             
             if cv2.waitKey(1) == 27 :
                 cv2.destroyAllWindows()
                 break
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            win.update()
+            win_start.update()
 
 
 
