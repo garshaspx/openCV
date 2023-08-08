@@ -1,11 +1,11 @@
 import cv2
 import torch
-
+from ultralytics import YOLO
 # Set device to GPU if available, CPU otherwise
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Initialize model and load weights
-model = YOLOv8('yolov8n.pt').to(device) 
+model = YOLO('yolov8n.pt').to(device) 
 
 # Run inference
 img = torch.rand(1, 3, 640, 640).to(device)  
@@ -30,11 +30,12 @@ while True:
 
 
 
-The key points are:
+# The key points are:
 
-Use torch.device to select GPU if available
-Move model to GPU using .to(device)
-Move input image to GPU as torch tensor
-Run model inference on GPU
-Move results back to CPU for plotting/display
-This will enable the YOLOv8 model to leverage the GPU for faster inference. Make sure to install PyTorch with CUDA support to access the GPU.
+# Use torch.device to select GPU if available
+# Move model to GPU using .to(device)
+# Move input image to GPU as torch tensor
+# Run model inference on GPU
+# Move results back to CPU for plotting/display
+# This will enable the YOLOv8 model to leverage the GPU for faster inference.
+# Make sure to install PyTorch with CUDA support to access the GPU.

@@ -41,6 +41,24 @@ from PIL import Image, ImageTk
 
 
 
+
+
+
+
+
+home = os.getcwd() + "\\"
+try:
+    os.mkdir(home+"data_machine")
+    os.mkdir(home+"data_machine\\train")
+    os.mkdir(home+"data_machine\\train\\images")
+    os.mkdir(home+"data_machine\\train\\labels")
+    os.mkdir(home+"data_machine\\val")
+    os.mkdir(home+"data_machine\\val\\images")
+    os.mkdir(home+"data_machine\\val\\labels")
+except:
+    pass
+
+
 index = 0
 arr = []
 while True:
@@ -52,13 +70,12 @@ while True:
     cap.release()
     index += 1
 
-
 win = tkinter.Tk()
 win.title("image processor")
 win.geometry("400x290")
 win.resizable(width=False, height=False)
-win.iconphoto(False, tkinter.PhotoImage(file = os.getcwd() + '\\media\\icon.png'))
-file_adress = "C:\\Users\\"+getuser()+"\\Documents\\data.txt"
+win.iconphoto(False, tkinter.PhotoImage(file = home + '\\media\\icon.png'))
+file_adress = home+"data.txt"
 
 
 def time():
@@ -68,10 +85,9 @@ def time():
 
 
 try:
-    connection = sqlite3.connect('C:\\Users\\garshasp\\Documents\\data_center.db')
+    connection = sqlite3.connect(home+'data_center.db')
 except:
-    print("db already exists")
-
+    pass
 
 
 # chang txt to sql
@@ -80,11 +96,7 @@ except:
 #         address            INT     NOT NULL);
 #          ''')
 
-"""
-connection.execute(f''' CREATE TABLE setting
-        (pt TEXT PRIMARY KEY     NOT NULL,
-        input            INT     NOT NULL);
-        ''')"""
+
 
 try:
     open(file_adress).close()
@@ -171,7 +183,6 @@ def library():
 
             if file:
                 address = os.path.abspath(file.name)
-            print(address)
             #tkinter.Label(new_library_win, text= f"chosen library is: {address}").grid(row=2, column=3)
             win.bind('<FocusIn>', win.lower())
     
@@ -241,10 +252,13 @@ def library():
 
 
 def start():
+
     global info
+
     if info[0] == "None":
         messagebox.showerror("error", "choose your library before starting\n video input is webcam by default")
         return    
+
     win_start = tkinter.Tk()
     win_start.title("image matcher")
     win_start.geometry("300x140")
@@ -271,17 +285,18 @@ def start():
     switch_but = tkinter.Button(win_start, text=info[2], command=lambda: switch())
     switch_but.place(x=250, y=45)
         
+
     adds = info[0].rstrip().split("==")
     model = YOLO(adds[1])
     threshold = 0.7  #add threshold option
-    cap = cv2.VideoCapture(0)
-            
-        
-        
+    if info[1] == "0":
+        cap = cv2.VideoCapture(0)
+    else:
+        cap = cv2.VideoCapture(info[1])
+
+    
     def start_match():        
         global info
-        
-
         start_time = time()
         connection.execute(f''' CREATE TABLE \"{start_time}\"
                 (code INT PRIMARY KEY     NOT NULL,
@@ -311,10 +326,10 @@ def start():
                         idd = box.id[0].item()
                         connection.execute(f"INSERT INTO \"{start_time}\" VALUES ({idd}, \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")
                         connection.commit()
-                        cv2.imwrite(f"C:\\Users\\garshasp\\Documents\\data_machine\\train\\images\\{time()}_{class_id}.jpg", frame)
-                        open(f"C:\\Users\\garshasp\\Documents\\data_machine\\train\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                        cv2.imwrite(f"{home}data_machine\\train\\images\\{time()}_{class_id}.jpg", frame)
+                        open(f"{home}data_machine\\train\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
                     except:
-                        print("id wasnt given, or already exists")
+                        pass
                         
             cv2.imshow("item Tracker", view)        
 
@@ -375,17 +390,14 @@ def start():
         #         print(f"image {i} features extracted")
         # tkinter.Label(win_start, text="library proccess finished          ", fg="blue").place(x=140, y=20)
         # win_start.update()
-
         # txt_list = []
         # for i in os.listdir(adds[1]+"\\"+"features"):
         #     txt_list.append(i)
         # if info[1] == "webcam" or "0":
         #     cam = cv2.VideoCapture(0)
-            
         #     #cam res set
         #     cam.set(3, 640)
         #     cam.set(4, 480)
-            
         # else:
         #     print(info[1])
         #     cam = cv2.VideoCapture(info[1])
@@ -453,7 +465,7 @@ def video():
     tkinter.Button(vid_win, text="save", fg="red", command=lambda:save()).place(x=270, y=50)
 
     def video_loc():
-        info[1] = filedialog.askopenfilename()    
+        info[1] = filedialog.askopenfile(filetypes=[('data Files', '*.mp4')]).name
         win.bind('<FocusIn>', win.lower())
         if info[1][-3:] == "mp4":
             vid_win.destroy()
@@ -461,6 +473,7 @@ def video():
             messagebox.showerror("file type", "make sure the file you choose is a mp4")    
     def save():
         info[1] = cam_chooser.get()
+        print(info)
         vid_win.destroy()
 
 
@@ -483,7 +496,7 @@ def video():
 
 
 
-
+# add setting to choose camera and other stuff
 
 def setting():
     s_win = tkinter.Tk()
@@ -491,10 +504,15 @@ def setting():
     s_win.geometry("300x150") 
     s_win.resizable(width=False, height=False)
     tkinter.Label(s_win, text="options will be coming soon", fg="red").pack()
-    """
-    add setting to choose camera and other stuff
-    """    
-    print("setting opened")
+
+    try:
+        connection.execute(f''' CREATE TABLE setting
+                (pt TEXT PRIMARY KEY     NOT NULL,
+                input            INT     NOT NULL);
+                ''')    
+    except:
+        pass
+    
 
 
 
@@ -506,6 +524,14 @@ def setting():
 
 
 
+def train():
+    
+    
+    # add train option
+    
+    # model = YOLO("C:\\Users\\garshasp\Documents\\yolov8m.pt")
+    # model.train(data="C:\\Users\\garshasp\\Desktop\\data.yaml", epochs=30, device=0)
+    return
 
 
 
@@ -518,7 +544,7 @@ def setting():
 
 label = tkinter.Label(win)
 label.place(x=-60, y=-30)
-image = Image.open(os.getcwd()+"\\media\\item_detec.gif")
+image = Image.open(home+"\\media\\item_detec.gif")
 frames = []
 try:
     while True:
@@ -540,8 +566,6 @@ tkinter.Button(win, text="choose input", command=lambda: video()).place(x=10, y=
 tkinter.Button(win, text="library manager", command= lambda : library()).place(x=10, y=130)
 tkinter.Button(win, text="setting", command= lambda : setting()).place(x=10, y=165)
 tkinter.Button(win, text="close", command= lambda : quit(), fg="red").place(x=10, y=200)
-
-
 
 
 win.mainloop()
