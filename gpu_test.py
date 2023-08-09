@@ -1,4 +1,16 @@
+
+
+
+
+import torch
+
+model = torch.load()
+print(model['train_args']['nbs'])
+
+
 import cv2
+
+
 import torch
 from ultralytics import YOLO
 # Set device to GPU if available, CPU otherwise
@@ -7,9 +19,13 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Initialize model and load weights
 model = YOLO('yolov8n.pt').to(device) 
 
+
+
+
 # Run inference
 img = torch.rand(1, 3, 640, 640).to(device)  
 results = model(img)
+
 
 # Rest of your code...
 

@@ -12,6 +12,14 @@
 
 
 
+
+
+
+
+
+
+
+import uuid
 import cv2
 import os
 import tkinter
@@ -19,7 +27,6 @@ import sqlite3
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
-from getpass import getuser
 from ultralytics import YOLO
 from datetime import datetime
 from PIL import Image, ImageTk
@@ -48,15 +55,35 @@ from PIL import Image, ImageTk
 
 home = os.getcwd() + "\\"
 try:
-    os.mkdir(home+"data_machine")
-    os.mkdir(home+"data_machine\\train")
-    os.mkdir(home+"data_machine\\train\\images")
-    os.mkdir(home+"data_machine\\train\\labels")
-    os.mkdir(home+"data_machine\\val")
-    os.mkdir(home+"data_machine\\val\\images")
-    os.mkdir(home+"data_machine\\val\\labels")
+    os.mkdir(home+"ML_train")
 except:
     pass
+try:
+    os.mkdir(home+"ML_train\\train")
+except:
+    pass
+try:   
+    os.mkdir(home+"ML_train\\train\\images")
+except:
+    pass
+try:
+    os.mkdir(home+"ML_train\\train\\labels")
+except:
+    pass
+try:
+    os.mkdir(home+"ML_train\\valid")
+except:
+    pass
+try:
+    os.mkdir(home+"ML_train\\valid\\images")
+except:
+    pass
+try:
+    os.mkdir(home+"ML_train\\valid\\labels")
+except:
+    pass
+
+
 
 
 index = 0
@@ -69,6 +96,8 @@ while True:
         arr.append(index)
     cap.release()
     index += 1
+
+
 
 win = tkinter.Tk()
 win.title("image processor")
@@ -84,10 +113,23 @@ def time():
     return time
 
 
+
+
 try:
     connection = sqlite3.connect(home+'data_center.db')
 except:
     pass
+try:
+    connection.execute(''' CREATE TABLE \"data_center\"
+            (code TEXT PRIMARY KEY     NOT NULL,
+            name           TEXT    NOT NULL,
+            conf            INT     NOT NULL,
+            cord        INT,
+            time        TEXT);
+            ''')
+except:
+    pass
+    # messagebox.showerror("error", "error accured while connecting/creating the database")
 
 
 # chang txt to sql
@@ -251,6 +293,35 @@ def library():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def start():
 
     global info
@@ -269,7 +340,6 @@ def start():
     tkinter.Label(win_start, text="stop matching :   press Esc on your keyboard").place(x=10, y=90)
 
     def switch():
-
         if info[2] == "ON":
             info[2] = "OFF"
             switch_but = tkinter.Button(win_start, text=info[2], command=lambda: switch())
@@ -289,6 +359,7 @@ def start():
     adds = info[0].rstrip().split("==")
     model = YOLO(adds[1])
     threshold = 0.7  #add threshold option
+    
     if info[1] == "0":
         cap = cv2.VideoCapture(0)
     else:
@@ -297,49 +368,74 @@ def start():
     
     def start_match():        
         global info
-        start_time = time()
-        connection.execute(f''' CREATE TABLE \"{start_time}\"
-                (code INT PRIMARY KEY     NOT NULL,
-                name           TEXT    NOT NULL,
-                conf            INT     NOT NULL,
-                cord        INT,
-                time        TEXT);
-                ''')
-
+        uuid4 = str(uuid.uuid4())
         while True:
             _, frame = cap.read()
             view = frame
             results = model.track(view, persist=True, conf=threshold) #  save_txt=True save data in txt
             result = results[0]
             for box in result.boxes:
-                
                 class_id = result.names[box.cls[0].item()]
                 cords = box.xyxy[0].tolist()
                 cords = [round(x) for x in cords]
                 conf = round(box.conf[0].item(), 2)
                 id_item = box.cls[0].item()
-                
                 if conf >= threshold:
-                    
                     view = results[0].plot()
-                    try:    
-                        idd = box.id[0].item()
-                        connection.execute(f"INSERT INTO \"{start_time}\" VALUES ({idd}, \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")
+                    try:  
+                        connection.execute(f"INSERT INTO \"data_center\" values (\"{uuid4+str(box.id[0].item())}\", \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")
                         connection.commit()
-                        cv2.imwrite(f"{home}data_machine\\train\\images\\{time()}_{class_id}.jpg", frame)
-                        open(f"{home}data_machine\\train\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                        cv2.imwrite(f"{home}ML_train\\train\\images\\{time()}_{class_id}.jpg", frame)
+                        open(f"{home}ML_train\\train\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
                     except:
                         pass
-                        
             cv2.imshow("item Tracker", view)        
-
-            
             if cv2.waitKey(1) == 27 :
                 cv2.destroyAllWindows()
                 break
-
             win.update()
             win_start.update()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -385,7 +481,7 @@ def start():
         #         keypoints, descriptors = sift.detectAndCompute(BW_image, None)
         #         with open(adds[1]+"\\"+"features\\"+i[0:-4]+".txt", "w") as file:
         #             for j in descriptors:
-        #                 des_numpy = ' '.join(str(value) for value in j)
+        #                 des_numpy = ' '.join(str(validue) for validue in j)
         #                 file.write(des_numpy + '\n')
         #         print(f"image {i} features extracted")
         # tkinter.Label(win_start, text="library proccess finished          ", fg="blue").place(x=140, y=20)
@@ -425,6 +521,48 @@ def start():
         #     if cv2.waitKey(1) == 27:
         #         cv2.destroyAllWindows()
         #         break
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -496,8 +634,47 @@ def video():
 
 
 
-# add setting to choose camera and other stuff
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# add setting to choose camera and other stuff
 def setting():
     s_win = tkinter.Tk()
     s_win.title("setting")
@@ -512,12 +689,6 @@ def setting():
                 ''')    
     except:
         pass
-    
-
-
-
-
-
 
 
 
@@ -526,20 +697,36 @@ def setting():
 
 def train():
     
+    train_win = tkinter.Tk()
+    train_win.title("train")
+    train_win.geometry("300x120")
+    train_win.resizable(width=False, height=False)
+    tkinter.Label(train_win, text="choose algoritm to train model :").place(x=10, y=10)
+    tkinter.Button(train_win, text="choose:", command=lambda : choose_direc(True)).place(x=210, y=10)
+    tkinter.Button(train_win, text="start training", command= lambda : start_train()).place(x=200, y=80)
+
+
+
+    address = ""
+    def choose_direc(x):
+        nonlocal address
+        if x:
+            file_ad = filedialog.askopenfile(mode='r', filetypes=[('data Files', '*.pt')])
+        if file_ad:
+            address = os.path.abspath(file_ad.name)
+            tkinter.Label(train_win, text= f"chosen:{address}", fg="red").place(x=10, y=35)
+        win.bind('<FocusIn>', win.lower())    
+
     
-    # add train option
-    
-    # model = YOLO("C:\\Users\\garshasp\Documents\\yolov8m.pt")
-    # model.train(data="C:\\Users\\garshasp\\Desktop\\data.yaml", epochs=30, device=0)
-    return
-
-
-
-
-
-
-
-
+    def start_train():
+        nonlocal address
+        # try:
+        print(home + "data.yaml")
+        model = YOLO(address)
+        model.train(data=home + "ML_train\\data.yaml", epochs=30)
+        # except:
+        #     messagebox.showerror("training error", "make sure all data is correct")
+        
 
 
 label = tkinter.Label(win)
@@ -561,11 +748,12 @@ update_frame(0)
 
 
 labe_intro = tkinter.Label(text="wellcome").place(x=190, y=10)
-tkinter.Button(win, text="start", command= lambda : start(), fg="blue").place(x=10, y=60)
-tkinter.Button(win, text="choose input", command=lambda: video()).place(x=10, y=95)
-tkinter.Button(win, text="library manager", command= lambda : library()).place(x=10, y=130)
-tkinter.Button(win, text="setting", command= lambda : setting()).place(x=10, y=165)
-tkinter.Button(win, text="close", command= lambda : quit(), fg="red").place(x=10, y=200)
+tkinter.Button(win, text="start", command= lambda : start(), fg="blue").place(x=10, y=50)
+tkinter.Button(win, text="choose input", command=lambda: video()).place(x=10, y=85)
+tkinter.Button(win, text="library manager", command= lambda : library()).place(x=10, y=120)
+tkinter.Button(win, text="ML trainer", command= lambda : train()).place(x=10, y=155)
+tkinter.Button(win, text="setting", command= lambda : setting()).place(x=10, y=190)
+tkinter.Button(win, text="close", command= lambda : quit(), fg="red").place(x=10, y=225)
 
 
 win.mainloop()
