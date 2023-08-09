@@ -695,6 +695,42 @@ def setting():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def train():
     
     train_win = tkinter.Tk()
@@ -704,6 +740,7 @@ def train():
     tkinter.Label(train_win, text="choose algoritm to train model :").place(x=10, y=10)
     tkinter.Button(train_win, text="choose:", command=lambda : choose_direc(True)).place(x=210, y=10)
     tkinter.Button(train_win, text="start training", command= lambda : start_train()).place(x=200, y=80)
+
 
 
 
@@ -720,13 +757,29 @@ def train():
     
     def start_train():
         nonlocal address
-        # try:
-        print(home + "data.yaml")
-        model = YOLO(address)
-        model.train(data=home + "ML_train\\data.yaml", epochs=30)
-        # except:
-        #     messagebox.showerror("training error", "make sure all data is correct")
+        try:
+            model = YOLO(address)
+            model.train(data=home + "ML_train\\data.yaml", epochs=30)
+        except:
+            messagebox.showerror("training error", "make sure all data is correct")
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 label = tkinter.Label(win)
@@ -744,6 +797,21 @@ def update_frame(frame_index):
     label.config(image=frames[frame_index])
     win.after(100, update_frame, (frame_index + 1) % len(frames))
 update_frame(0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
