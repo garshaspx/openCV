@@ -18,12 +18,13 @@
 
 
 
-
+import sys
 import uuid
 import cv2
 import os
 import tkinter
 import sqlite3
+import threading
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
@@ -303,40 +304,21 @@ def library():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def start():
-
     global info
-
     if info[0] == "None":
-        messagebox.showerror("error", "choose your library before starting\n video input is webcam by default")
+        messagebox.showerror("library error", "choose your library before starting")
         return    
-
+    elif info[1] == False:
+        messagebox.showerror("input error", "choose video input")
+        return
     win_start = tkinter.Tk()
     win_start.title("image matcher")
     win_start.geometry("300x140")
     win_start.state("normal")
     win.resizable(width=False, height=False)
     tkinter.Label(win_start, text="start matching :").place(x=10, y=20)
-    tkinter.Button(win_start, text="start", command=lambda: start_match()).place(x=100, y=20)
+    tkinter.Button(win_start, text="start", command=lambda: threading.Thread(target=start_match).start()).place(x=100, y=20)
     tkinter.Label(win_start, text="stop matching :   press Esc on your keyboard").place(x=10, y=90)
 
     def switch():
@@ -355,16 +337,14 @@ def start():
     switch_but = tkinter.Button(win_start, text=info[2], command=lambda: switch())
     switch_but.place(x=250, y=45)
         
-
     adds = info[0].rstrip().split("==")
     model = YOLO(adds[1])
     threshold = 0.7  #add threshold option
-    
+
     if info[1] == "0":
         cap = cv2.VideoCapture(0)
     else:
         cap = cv2.VideoCapture(info[1])
-
     
     def start_match():        
         global info
@@ -393,48 +373,7 @@ def start():
             if cv2.waitKey(1) == 27 :
                 cv2.destroyAllWindows()
                 break
-            win.update()
-            win_start.update()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
 
 
 
@@ -546,58 +485,23 @@ def start():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def video():
     vid_win = tkinter.Tk()
     vid_win.title("choose video input")
     vid_win.geometry("320x110")
     vid_win.resizable(width=False, height=False)
     tkinter.Label(vid_win, text="choose a camera : ").place(x=20, y=10)
+    
     cam_chooser = ttk.Combobox(vid_win, width = 20, textvariable = tkinter.StringVar())
-
-    #fill the camera list 
-    #add it
-    cam_chooser['values'] = arr  
-    cam_chooser.place(x=150, y=10)
-    cam_chooser.current(0)
+    if arr != []:
+        cam_chooser['values'] = arr
+        cam_chooser.current(0)
+    else:
+        info[1] = False
+        cam_chooser['values'] = ["no camera found"]
+        cam_chooser.current(0)
+    cam_chooser.place(x=150, y=10) 
+        
     tkinter.Label(vid_win, text="choose a video : ").place(x=20, y=50)
     tkinter.Button(vid_win, text="choose", command=lambda:video_loc()).place(x=180, y=50)    
     tkinter.Button(vid_win, text="save", fg="red", command=lambda:save()).place(x=270, y=50)
@@ -613,46 +517,6 @@ def video():
         info[1] = cam_chooser.get()
         print(info)
         vid_win.destroy()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -712,49 +576,23 @@ def setting():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def train():
-    
     train_win = tkinter.Tk()
     train_win.title("train")
     train_win.geometry("300x120")
     train_win.resizable(width=False, height=False)
     tkinter.Label(train_win, text="choose algoritm to train model :").place(x=10, y=10)
-    tkinter.Button(train_win, text="choose:", command=lambda : choose_direc(True)).place(x=210, y=10)
-    tkinter.Button(train_win, text="start training", command= lambda : start_train()).place(x=200, y=80)
-
-
-
-
+    tkinter.Button(train_win, text="choose:", command=lambda : choose_direc()).place(x=210, y=10)
+    tkinter.Button(train_win, text="start training", command= lambda : threading.Thread(target=start_train).start()).place(x=200, y=80)
     address = ""
-    def choose_direc(x):
+
+    def choose_direc():
         nonlocal address
-        if x:
-            file_ad = filedialog.askopenfile(mode='r', filetypes=[('data Files', '*.pt')])
+        file_ad = filedialog.askopenfile(mode='r', filetypes=[('data Files', '*.pt')])
         if file_ad:
             address = os.path.abspath(file_ad.name)
             tkinter.Label(train_win, text= f"chosen:{address}", fg="red").place(x=10, y=35)
         win.bind('<FocusIn>', win.lower())    
-
-    
     def start_train():
         nonlocal address
         try:
@@ -762,10 +600,6 @@ def train():
             model.train(data=home + "ML_train\\data.yaml", epochs=30)
         except:
             messagebox.showerror("training error", "make sure all data is correct")
-        
-
-
-
 
 
 
@@ -792,7 +626,6 @@ try:
         image.seek(len(frames))
 except EOFError:
     pass
-
 def update_frame(frame_index):
     label.config(image=frames[frame_index])
     win.after(100, update_frame, (frame_index + 1) % len(frames))
@@ -821,7 +654,6 @@ tkinter.Button(win, text="choose input", command=lambda: video()).place(x=10, y=
 tkinter.Button(win, text="library manager", command= lambda : library()).place(x=10, y=120)
 tkinter.Button(win, text="ML trainer", command= lambda : train()).place(x=10, y=155)
 tkinter.Button(win, text="setting", command= lambda : setting()).place(x=10, y=190)
-tkinter.Button(win, text="close", command= lambda : quit(), fg="red").place(x=10, y=225)
-
+tkinter.Button(win, text="close", command= lambda : sys.exit("Error message"), fg="red").place(x=10, y=225)
 
 win.mainloop()
