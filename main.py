@@ -18,6 +18,8 @@
 
 
 
+
+
 import sys
 import uuid
 import cv2
@@ -113,9 +115,6 @@ def time():
     time = now.strftime("%Y_%m_%d_%H_%M_%S")
     return time
 
-
-
-
 try:
     connection = sqlite3.connect(home+'data_center.db')
 except:
@@ -132,15 +131,11 @@ except:
     pass
     # messagebox.showerror("error", "error accured while connecting/creating the database")
 
-
 # chang txt to sql
 # connection.execute(f''' CREATE TABLE DBaddress
 #         (code TEXT PRIMARY KEY     NOT NULL,
 #         address            INT     NOT NULL);
 #          ''')
-
-
-
 try:
     open(file_adress).close()
 except:
@@ -273,9 +268,6 @@ def library():
     tkinter.Button(lib_win, text="add library", command=lambda : add_direc_txt()).place(x=40, y=220)
     tkinter.Button(lib_win, text="delete library", command=lambda: delete()).place(x=135, y=220)
     tkinter.Button(lib_win, text="active library", command=lambda: active()).place(x=240, y=220)
-
-
-
 
 
 
@@ -515,7 +507,6 @@ def video():
             messagebox.showerror("file type", "make sure the file you choose is a mp4")    
     def save():
         info[1] = cam_chooser.get()
-        print(info)
         vid_win.destroy()
 
 
@@ -577,15 +568,18 @@ def setting():
 
 
 def train():
+    
     train_win = tkinter.Tk()
     train_win.title("train")
     train_win.geometry("300x120")
-    train_win.resizable(width=False, height=False)
+    # train_win.resizable(width=False, height=False)
     tkinter.Label(train_win, text="choose algoritm to train model :").place(x=10, y=10)
     tkinter.Button(train_win, text="choose:", command=lambda : choose_direc()).place(x=210, y=10)
     tkinter.Button(train_win, text="start training", command= lambda : threading.Thread(target=start_train).start()).place(x=200, y=80)
-    address = ""
+    tkinter.Button(train_win, text="stop training", bg="red" ,command= lambda : stop_tain()).place(x=100, y=80)
+    
 
+    address = ""
     def choose_direc():
         nonlocal address
         file_ad = filedialog.askopenfile(mode='r', filetypes=[('data Files', '*.pt')])
@@ -593,6 +587,7 @@ def train():
             address = os.path.abspath(file_ad.name)
             tkinter.Label(train_win, text= f"chosen:{address}", fg="red").place(x=10, y=35)
         win.bind('<FocusIn>', win.lower())    
+        
     def start_train():
         nonlocal address
         try:
@@ -600,6 +595,35 @@ def train():
             model.train(data=home + "ML_train\\data.yaml", epochs=30)
         except:
             messagebox.showerror("training error", "make sure all data is correct")
+                
+    def stop_tain():
+        # add terminate option
+        # x.terminate()            
+        return    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -630,9 +654,6 @@ def update_frame(frame_index):
     label.config(image=frames[frame_index])
     win.after(100, update_frame, (frame_index + 1) % len(frames))
 update_frame(0)
-
-
-
 
 
 
