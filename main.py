@@ -330,6 +330,7 @@ def start():
 
         
         connection = sqlite3.connect(home+'data_center.db')
+
         try:
             connection.execute(''' CREATE TABLE \"data_center\"
                     (code TEXT PRIMARY KEY     NOT NULL,
@@ -367,93 +368,6 @@ def start():
                 cv2.destroyAllWindows()
                 break
         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-        # try:
-        #     os.mkdir(os.path.join(adds[1], "features"))
-        # except:
-        #     pass
-        # tkinter.Label(win_start, text="library is being procceesed..         ", fg="red").place(x=140, y=20)
-        # win_start.update()
-        # sift = cv2.xfeatures2d.SIFT_create()
-        # for i in os.listdir(adds[1]):
-        #     if i[-3:].lower() == "jpg" or i[-3:].lower() == "png":
-        #         image = cv2.imread(adds[1]+"\\"+i)
-        #         image = cv2.convertScaleAbs(image)
-        #         BW_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        #         keypoints, descriptors = sift.detectAndCompute(BW_image, None)
-        #         with open(adds[1]+"\\"+"features\\"+i[0:-4]+".txt", "w") as file:
-        #             for j in descriptors:
-        #                 des_numpy = ' '.join(str(validue) for validue in j)
-        #                 file.write(des_numpy + '\n')
-        #         print(f"image {i} features extracted")
-        # tkinter.Label(win_start, text="library proccess finished          ", fg="blue").place(x=140, y=20)
-        # win_start.update()
-        # txt_list = []
-        # for i in os.listdir(adds[1]+"\\"+"features"):
-        #     txt_list.append(i)
-        # if info[1] == "webcam" or "0":
-        #     cam = cv2.VideoCapture(0)
-        #     #cam res set
-        #     cam.set(3, 640)
-        #     cam.set(4, 480)
-        # else:
-        #     print(info[1])
-        #     cam = cv2.VideoCapture(info[1])
-        # bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
-        # highest_match = [0, 0]
-        # while True:
-        #     id, frame = cam.read()
-        #     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        #     key, des = sift.detectAndCompute(frame_gray, None)            
-        #     highest_match[0] = 0
-        #     for i in txt_list:
-        #         info_mat = np.loadtxt(adds[1]+"\\"+"features"+"\\"+i)
-        #         info_mat = info_mat.astype(np.float32)
-        #         matches = bf.match(info_mat, des)
-        #         if len(matches) > highest_match[0]:
-        #             highest_match[0] = len(matches)
-        #             highest_match[1] = i
-        #     save(highest_match[1][:-4])
-        #     if info[2] == "ON" :
-        #         image_hm = cv2.imread(adds[1]+"\\"+highest_match[1][:-4]+".jpg")
-        #         matcher = np.concatenate((frame, image_hm), axis=1)
-        #         cv2.putText(matcher, f"image found: {highest_match[1][:-4]}.jpg", (750, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
-        #         cv2.putText(matcher, "camera", (300, 20), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)                    
-        #         cv2.imshow("two image", matcher)
-        #     if cv2.waitKey(1) == 27:
-        #         cv2.destroyAllWindows()
-        #         break
-
 
 
 
