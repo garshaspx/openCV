@@ -115,20 +115,7 @@ def time():
     time = now.strftime("%Y_%m_%d_%H_%M_%S")
     return time
 
-try:
-    connection = sqlite3.connect(home+'data_center.db')
-except:
-    pass
-try:
-    connection.execute(''' CREATE TABLE \"data_center\"
-            (code TEXT PRIMARY KEY     NOT NULL,
-            name           TEXT    NOT NULL,
-            conf            INT     NOT NULL,
-            cord        INT,
-            time        TEXT);
-            ''')
-except:
-    pass
+
     # messagebox.showerror("error", "error accured while connecting/creating the database")
 
 # chang txt to sql
@@ -340,6 +327,20 @@ def start():
     
     def start_match():        
         global info
+
+        
+        connection = sqlite3.connect(home+'data_center.db')
+        try:
+            connection.execute(''' CREATE TABLE \"data_center\"
+                    (code TEXT PRIMARY KEY     NOT NULL,
+                    name           TEXT    NOT NULL,
+                    conf            INT     NOT NULL,
+                    cord        INT,
+                    time        TEXT);
+                    ''')
+        except:
+            pass
+
         uuid4 = str(uuid.uuid4())
         while True:
             _, frame = cap.read()
@@ -536,7 +537,7 @@ def setting():
     s_win.geometry("300x150") 
     s_win.resizable(width=False, height=False)
     tkinter.Label(s_win, text="options will be coming soon", fg="red").pack()
-
+    connection = sqlite3.connect(home+'data_center.db')
     try:
         connection.execute(f''' CREATE TABLE setting
                 (pt TEXT PRIMARY KEY     NOT NULL,
