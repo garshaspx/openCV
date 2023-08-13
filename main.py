@@ -6,12 +6,6 @@
 # gui interface
 # stores data
 # uses machine learning to learn data of image
-# 
-#
-
-
-
-
 
 
 
@@ -53,9 +47,6 @@ from PIL import Image, ImageTk
 
 
 
-
-
-
 home = os.getcwd() + "\\"
 try:
     os.mkdir(home+"ML_train")
@@ -86,9 +77,6 @@ try:
 except:
     pass
 
-
-
-
 index = 0
 arr = []
 while True:
@@ -100,8 +88,6 @@ while True:
     cap.release()
     index += 1
 
-
-
 win = tkinter.Tk()
 win.title("image processor")
 win.geometry("400x290")
@@ -109,20 +95,11 @@ win.resizable(width=False, height=False)
 win.iconphoto(False, tkinter.PhotoImage(file = home + '\\media\\icon.png'))
 file_adress = home+"data.txt"
 
-
 def time():
     now = datetime.now()
     time = now.strftime("%Y_%m_%d_%H_%M_%S")
     return time
 
-
-    # messagebox.showerror("error", "error accured while connecting/creating the database")
-
-# chang txt to sql
-# connection.execute(f''' CREATE TABLE DBaddress
-#         (code TEXT PRIMARY KEY     NOT NULL,
-#         address            INT     NOT NULL);
-#          ''')
 try:
     open(file_adress).close()
 except:
@@ -130,40 +107,9 @@ except:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #info = [library-address,  video-input, "ON or OFF"]
 info = ["None", 0, "ON"]
-
 def library():
-    
     global info
     lib_win = tkinter.Tk()
     lib_win.title("library manager")
@@ -186,7 +132,6 @@ def library():
             temp = address.rstrip().split("==")
             tv.insert('', "end", iid = name, text = temp[0], values = temp[1]) 
         lib_win.update()
-    
     refresh_lib()
     
     def add_direc_txt():
@@ -226,13 +171,11 @@ def library():
     def delete():
         con_list = []
         con_file = open(file_adress, "r+")
-    
         try:
             x = tv.focus()
             int(x)
         except:
             return
-    
         for index, i in enumerate(con_file):
             contact = i.rstrip()
             con_list.append(contact)
@@ -242,7 +185,6 @@ def library():
         for i in con_list:
             con_file.write(i+"\n")
         con_file.close()
-    
         refresh_lib()
     
     def active():
@@ -251,35 +193,9 @@ def library():
         kk = con_file.readlines()
         info[0] = kk[ac]
         lib_win.destroy()
-    
     tkinter.Button(lib_win, text="add library", command=lambda : add_direc_txt()).place(x=40, y=220)
     tkinter.Button(lib_win, text="delete library", command=lambda: delete()).place(x=135, y=220)
     tkinter.Button(lib_win, text="active library", command=lambda: active()).place(x=240, y=220)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -327,10 +243,8 @@ def start():
     
     def start_match():        
         global info
-
-        
         connection = sqlite3.connect(home+'data_center.db')
-
+        
         try:
             connection.execute(''' CREATE TABLE \"data_center\"
                     (code TEXT PRIMARY KEY     NOT NULL,
@@ -341,7 +255,7 @@ def start():
                     ''')
         except:
             pass
-
+        
         uuid4 = str(uuid.uuid4())
         while True:
             _, frame = cap.read()
@@ -367,28 +281,6 @@ def start():
             if cv2.waitKey(1) == 27 :
                 cv2.destroyAllWindows()
                 break
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -426,24 +318,6 @@ def video():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # add setting to choose camera and other stuff
 def setting():
     s_win = tkinter.Tk()
@@ -462,28 +336,7 @@ def setting():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def train():
-    
     train_win = tkinter.Tk()
     train_win.title("train")
     train_win.geometry("300x120")
@@ -493,7 +346,6 @@ def train():
     tkinter.Button(train_win, text="start training", command= lambda : threading.Thread(target=start_train).start()).place(x=200, y=80)
     tkinter.Button(train_win, text="stop training", bg="red" ,command= lambda : stop_tain()).place(x=100, y=80)
     
-
     address = ""
     def choose_direc():
         nonlocal address
@@ -518,43 +370,6 @@ def train():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 label = tkinter.Label(win)
 label.place(x=-60, y=-30)
 image = Image.open(home+"\\media\\item_detec.gif")
@@ -569,18 +384,6 @@ def update_frame(frame_index):
     label.config(image=frames[frame_index])
     win.after(100, update_frame, (frame_index + 1) % len(frames))
 update_frame(0)
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

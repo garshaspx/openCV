@@ -31,7 +31,7 @@ Prepares dataset in standard format for training
 
 ---Model Training
 Provides option to train a custom YOLO model on collected images
-Uses YOLOv5 model architecture and training code
+Uses YOLOv8 model architecture and training code
 Allows configuring training hyperparameters like batch size, epochs etc.
 Resumes training from previous checkpoints
 Exports trained model to use for inference
