@@ -3,6 +3,7 @@ Image Processing Application
 This is a Python application for real-time object detection, tracking and model training using computer vision and deep learning. It provides a GUI to manage the entire workflow.
 
 -Features
+
 ---Object Detection
 Uses YOLOv8 object detection model to identify common objects like person, car, pet or any pre-trained object.
 Loads a pretrained model and runs inference on input video/images
