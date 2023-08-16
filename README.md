@@ -1,8 +1,9 @@
-
 Image Processing Application
 This is a Python application for real-time object detection, tracking and model training using computer vision and deep learning. It provides a GUI to manage the entire workflow.
 
--Features
+
+--Features
+
 
 ---Object Detection
 Uses YOLOv8 object detection model to identify common objects like person, car, pet or any pre-trained object.
@@ -41,6 +42,7 @@ Exports trained model to use for inference
 Organize multiple databases/libraries of images
 Add, delete, activate different libraries
 Switch between multiple datasets for model training
+
 ---Requirements
 Python 3.7 or later
 OpenCV
@@ -55,4 +57,4 @@ Run python main.py to launch the application
 Add new libraries using the library manager
 Choose input and start object tracking
 View real-time detections on screen
-Train custom models using collected images(before training the data set make sure to add YAML file in ML_train folder)
+Train custom models using collected images (before training the data-set make sure to add YAML file in ML_train folder)
