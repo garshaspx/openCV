@@ -19,11 +19,6 @@
 
 
 
-
-
-
-
-
 #importing all needed librarys, some need to be installed
 from sys import exit
 from uuid import uuid4
