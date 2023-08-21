@@ -1,4 +1,0 @@
-cv2 
-sqlite3
-ultralytics
-PIL

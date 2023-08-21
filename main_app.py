@@ -1,5 +1,4 @@
 # amirhosein heidari
-# 
 # feature extacter
 # item detector
 # item tracker
@@ -8,25 +7,17 @@
 # uses machine learning to learn data of image
 
 
-
-
-
-
-
-
 #importing all needed librarys, some need to be installed
 from sys import exit
 from uuid import uuid4
-from cv2 import VideoCapture, imshow, waitKey, destroyAllWindows, imwrite
-from os import path, mkdir, getcwd
-from tkinter import Tk, Label, Button, Entry, StringVar, PhotoImage, messagebox, filedialog, ttk
 from sqlite3 import connect
 from threading import Thread
 from ultralytics import YOLO
 from datetime import datetime
 from PIL import ImageTk, Image
-
-
+from os import path, mkdir, getcwd
+from cv2 import VideoCapture, imshow, waitKey, destroyAllWindows, imwrite
+from tkinter import Tk, Label, Button, Entry, StringVar, PhotoImage, messagebox, filedialog, ttk
 
 #creating directory and needed folders
 home = getcwd() + "\\"
@@ -58,26 +49,18 @@ try:
     mkdir(home+"ML_train\\valid\\labels")
 except:
     pass
-    
-    
-is_working = True
-dev_port = 0
-arr = []
 
-while is_working:
-    camera = VideoCapture(dev_port)
-    if not camera.isOpened():
-        is_working = False
+
+index = 0
+arr = [] #list of cameras
+while True:  #accessing the camera connected to  the system
+    cap = VideoCapture(index)
+    if not cap.read()[0]:
+        break
     else:
-        is_reading, img = camera.read()
-        w = camera.get(3)
-        h = camera.get(4)
-        if is_reading:
-            arr.append(dev_port)
-    dev_port +=1
-
-
-
+        arr.append(index)
+    cap.release()
+    index += 1
 
 win = Tk() #main tkinter window 
 win.title("image processor") #title
@@ -245,12 +228,15 @@ def video():        #func to choose video input
 
 def start():           #main func to start the program and start window
     global info
+    
+    
     if info[0] == "None": #incase input and data-set wasnt choosen
         messagebox.showerror("library error", "choose your library before starting")
         return    
     elif info[1] == False:
         messagebox.showerror("input error", "choose video input")
         return
+    
     win_start = Tk()  #creating start window
     win_start.title("image matcher")
     win_start.geometry("300x140")
@@ -275,6 +261,7 @@ def start():           #main func to start the program and start window
     switch_lab.place(x=170, y=45)
     switch_but = Button(win_start, text=info[2], command=lambda: switch())
     switch_but.place(x=250, y=45)
+        
     adds = info[0].rstrip().split("==") 
     model = YOLO(adds[1]) #loading data-set
     threshold = 0.7  #add threshold option
@@ -282,16 +269,12 @@ def start():           #main func to start the program and start window
     if info[1] == "0": #loading webcam
         cap = VideoCapture(0)
     else:
-        try:
-            cap = VideoCapture(int(info[1]))
-        except:
-            cap = VideoCapture(info[1])
-    
-    
+        cap = VideoCapture(info[1])
     
     def start_match():        #starting the main prosec
         global info
         connection = connect(home+'data_center.db')          #connecting to data base
+        
         try:     #createa a table incase it doesnt have it
             connection.execute(''' CREATE TABLE \"data_center\"
                     (code TEXT PRIMARY KEY     NOT NULL,
@@ -302,12 +285,15 @@ def start():           #main func to start the program and start window
                     ''')
         except:
             pass
+        
         uuid = str(uuid4()) #create a uniqe id , its used in database
         while True: #main loop 
             _, frame = cap.read()
-            view = frame
-            results = model.track(view, conf=threshold)#proccessing the frame              #  save_txt=True save data in txt
+            view = frame 
+            
+            results = model.track(view, persist=True, conf=threshold)#proccessing the frame              #  save_txt=True save data in txt
             result = results[0] 
+            
             for box in result.boxes:         # puting bouding box around found items
                 
                 class_id = result.names[box.cls[0].item()]
@@ -317,6 +303,7 @@ def start():           #main func to start the program and start window
                 
                 if conf >= threshold:        #threshold if
                     view = results[0].plot()
+                
                     try:   # storing data in database and saving image and labels for training
                         connection.execute(f"INSERT INTO \"data_center\" values (\"{uuid+str(box.id[0].item())}\", \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")           
                         connection.commit()
@@ -324,15 +311,10 @@ def start():           #main func to start the program and start window
                         open(f"{home}ML_train\\train\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
                     except:
                         pass
-                    
             imshow("item Tracker", view)        #showing it live
             if waitKey(1) == 27 : #close the windows by taping Esc
                 destroyAllWindows()
                 break
-
-
-
-
 
 
 
@@ -378,11 +360,6 @@ def train():    #creating tkinter window to train a new data-set
 
 
 
-
-
-
-
-
 # add setting to choose camera and other stuff
 def setting():
     s_win = Tk()
@@ -406,14 +383,8 @@ def setting():
 
 
 
-
-
-
-
-
-
-
 # tkinter backgroung and icon
+
 label = Label(win)
 label.place(x=-60, y=-30)
 image = Image.open(home+"\\media\\item_detec.gif")
@@ -430,18 +401,12 @@ def update_frame(frame_index):
 update_frame(0)
 
 
-
-
-
 labe_intro = Label(text="wellcome").place(x=190, y=10)
 Button(win, text="start", command= lambda : start(), fg="blue").place(x=10, y=50)
 Button(win, text="choose input", command=lambda: video()).place(x=10, y=85)
 Button(win, text="library manager", command= lambda : library()).place(x=10, y=120)
 Button(win, text="ML trainer", command= lambda : train()).place(x=10, y=155)
 Button(win, text="setting", command= lambda : setting()).place(x=10, y=190)
-Button(win, text="close", command= lambda : exit(), fg="red").place(x=10, y=225)
-
-
-
+Button(win, text="close", command= lambda : quit(), fg="red").place(x=10, y=225)
 
 win.mainloop()
