@@ -15,27 +15,14 @@ chdir(current_directory)
 
 
 print("installig ...")
-call(f"python -m nuitka --enable-plugin=tk-inter --disable-console --windows-icon-from-ico=media/icon.ico main_app.py")
-print("-------installination is done")
+
+try:
+    call(f"python -m nuitka --enable-plugin=tk-inter --disable-console --windows-icon-from-ico=media/icon.ico main_app.py")
+    print("-------installination is done")
+except:
+    print("installination failed.")
 
 
 
-
-
-# executable_path = "main_app.exe"
-# # Get the desktop directory
-# desktop_directory = path.join(path.expanduser("~"), "Desktop")
-# # Create a shortcut file name
-# shortcut_name = "item_detector.lnk"
-# # Create the command to create the shortcut
-# command = 'powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut(\'{0}\');$s.TargetPath=\'{1}\';$s.Save()"'.format(
-#     path.join(desktop_directory, shortcut_name),
-#     path.abspath(executable_path)
-# )
-# # Create the shortcut using subprocess
-# call(command, shell=True)
-
-
-
-
+# print("shorcut created ")
 input("-------press enter to exit ... ")
