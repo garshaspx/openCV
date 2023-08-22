@@ -6,8 +6,7 @@ import os
 def install_packages(packages):
     for package, version in packages.items():
         try:
-            x = subprocess.check_output(['pip', 'install', f"{package}=={version}"])
-            print(x)
+            subprocess.call(['pip', 'install', f"{package}=={version}"])
             print(f"Successfully installed {package} version {version}")
         except subprocess.CalledProcessError:
             print(f"Failed to install {package}")
