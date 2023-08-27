@@ -287,6 +287,7 @@ def start():           #main func to start the program and start window
             pass
         
         uuid = str(uuid4()) #create a uniqe id , its used in database
+        i = 0
         while True: #main loop 
             _, frame = cap.read()
             view = frame 
@@ -307,8 +308,14 @@ def start():           #main func to start the program and start window
                     try:   # storing data in database and saving image and labels for training
                         connection.execute(f"INSERT INTO \"data_center\" values (\"{uuid+str(box.id[0].item())}\", \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")           
                         connection.commit()
-                        imwrite(f"{home}ML_train\\train\\images\\{time()}_{class_id}.jpg", frame)
-                        open(f"{home}ML_train\\train\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2)/frame.shape[1]} {((cords[1]+cords[3])/2)/frame.shape[0]} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                        if i == 6 :
+                            imwrite(f"{home}ML_train\\valid\\images\\{time()}_{class_id}.jpg", frame)
+                            open(f"{home}ML_train\\valid\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                            i = 0
+                        else:
+                            imwrite(f"{home}ML_train\\train\\images\\{time()}_{class_id}.jpg", frame)
+                            open(f"{home}ML_train\\train\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                            i += 1
                     except:
                         pass
        
