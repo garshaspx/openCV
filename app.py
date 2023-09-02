@@ -7,16 +7,43 @@
 # uses machine learning to learn data of image
 
 
+
+#using multi-threading for faster loading
+from cv2 import VideoCapture
+from threading import Thread
+
+arr = []#list of cameras
+def cam_finder():
+    index = 0 
+    while True:  #accessing the camera connected to  the systemprint('ddddddddd')
+        cap = VideoCapture(index)
+        if not cap.read()[0]:
+            break
+        else:
+            arr.append(index)
+        cap.release()
+        index += 1
+cam_loader = Thread(target=cam_finder)
+
+YOLO = None
+def yol():
+    global YOLO
+    from ultralytics import YOLO
+yol_thread = Thread(target=yol)    
+
+
+cam_loader.start() #starting diferent threads
+yol_thread.start()
+
+
 #importing all needed librarys, some need to be installed
 from sys import exit
 from uuid import uuid4
 from sqlite3 import connect
-from threading import Thread
-from ultralytics import YOLO
 from datetime import datetime
 from PIL import ImageTk, Image
 from os import path, mkdir, getcwd
-from cv2 import VideoCapture, imshow, waitKey, destroyAllWindows, imwrite
+from cv2 import imshow, waitKey, destroyAllWindows, imwrite
 from tkinter import Tk, Label, Button, Entry, StringVar, PhotoImage, messagebox, filedialog, ttk
 
 
@@ -53,16 +80,7 @@ except:
     pass
 
 
-index = 0
-arr = [] #list of cameras
-while True:  #accessing the camera connected to  the system
-    cap = VideoCapture(index)
-    if not cap.read()[0]:
-        break
-    else:
-        arr.append(index)
-    cap.release()
-    index += 1
+
 
 win = Tk() #main tkinter window 
 win.title("image processor") #title
@@ -185,6 +203,7 @@ def library(): #function to manage library manager window
 
 
 def video():        #func to choose video input 
+    cam_loader.join() # incase cam finder isnt finished
     vid_win = Tk()
     vid_win.title("choose video input")
     vid_win.geometry("320x110")
@@ -229,8 +248,8 @@ def video():        #func to choose video input
 
 
 def start():           #main func to start the program and start window
+    yol_thread.join()
     global info
-    
     
     if info[0] == "None": #incase input and data-set wasnt choosen
         messagebox.showerror("library error", "choose your library before starting")
