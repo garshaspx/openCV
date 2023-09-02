@@ -101,8 +101,8 @@ except:
 
 
 
-#info = [library-address,  video-input, "ON or OFF"]
-info = ["None", 0, "ON"]
+#info = [library-address,  video-input, "ON or OFF", threshold]
+info = ["None", 0, "ON", 0.7]
 
 def library(): #function to manage library manager window 
     global info
@@ -149,7 +149,7 @@ def library(): #function to manage library manager window
             if file:
                 address = path.abspath(file.name)
             #Label(new_library_win, text= f"chosen library is: {address}").grid(row=2, column=3)
-            win.bind('<FocusIn>', win.lower())                   #puting the main window behind
+            win.bind('<FocusIn>', win.lower())                  #puting the main window behind
     
         def save():                #saaving the data in txt file and closing new lib window
             nonlocal address
@@ -266,26 +266,26 @@ def start():           #main func to start the program and start window
     Label(win_start, text="start matching :").place(x=10, y=20)
     Button(win_start, text="start", command=lambda: Thread(target=start_match).start()).place(x=100, y=20)
     Label(win_start, text="stop matching :   press Esc on your keyboard").place(x=10, y=90)
+    Label(win_start, text=f"your threshold is {info[3]}").place(x=10, y=110)
 
     def switch():          #option to make view mode on or off
         if info[2] == "ON":
             info[2] = "OFF"
             switch_but = Button(win_start, text=info[2], command=lambda: switch())
-            switch_but.place(x=250, y=45)
+            switch_but.place(x=260, y=20)
             win_start.update()
         else:
             info[2] = "ON"
             switch_but = Button(win_start, text=info[2]+" ", command=lambda: switch())
-            switch_but.place(x=250, y=45)
+            switch_but.place(x=260, y=20)
             win_start.update()
     switch_lab = Label(win_start, text="view mode :")
-    switch_lab.place(x=170, y=45)
+    switch_lab.place(x=170, y=20)
     switch_but = Button(win_start, text=info[2], command=lambda: switch())
-    switch_but.place(x=250, y=45)
+    switch_but.place(x=260, y=20)
         
     adds = info[0].rstrip().split("==") 
     model = YOLO(adds[1]) #loading data-set
-    threshold = 0.7  #add threshold option
 
     if info[1] == "0": #loading webcam
         cap = VideoCapture(0)
@@ -313,7 +313,7 @@ def start():           #main func to start the program and start window
             _, frame = cap.read()
             view = frame 
             
-            results = model.track(view, persist=True, conf=threshold)#proccessing the frame              #  save_txt=True save data in txt
+            results = model.track(view, persist=True, conf=info[3])#proccessing the frame              #  save_txt=True save data in txt
             result = results[0] 
             
             for box in result.boxes:         # puting bouding box around found items
@@ -323,7 +323,7 @@ def start():           #main func to start the program and start window
                 conf = round(box.conf[0].item(), 2)
                 id_item = box.cls[0].item()
                 
-                if conf >= threshold:        #threshold if
+                if conf >= info[3]:        #threshold if
                     view = results[0].plot()
                 
                     try:   # storing data in database and saving image and labels for training
@@ -355,7 +355,7 @@ def train():    #creating tkinter window to train a new data-set
     train_win = Tk()
     train_win.title("train")
     train_win.geometry("300x120")
-    # train_win.resizable(width=False, height=False)
+    train_win.resizable(width=False, height=False)
     Label(train_win, text="choose algoritm to train model :").place(x=10, y=10)
     Button(train_win, text="choose:", command=lambda : choose_direc()).place(x=210, y=10)
     Button(train_win, text="start training", command= lambda : Thread(target=start_train).start()).place(x=200, y=80)
@@ -388,54 +388,89 @@ def train():    #creating tkinter window to train a new data-set
 
 
 
-
+# info = [library-address,  video-input, "ON or OFF", threshold]
+# info = ["None", 0, "ON", 0.7]
 # add setting to choose camera and other stuff
 def setting():
+    global info
     s_win = Tk()
     s_win.title("setting")
     s_win.geometry("300x150") 
     s_win.resizable(width=False, height=False)
-    Label(s_win, text="options will be coming soon", fg="red").pack()
+    
     connection = connect(home+'data_center.db')
     try:
-        connection.execute(f''' CREATE TABLE setting
-                (pt TEXT PRIMARY KEY     NOT NULL,
-                input            INT     NOT NULL);
-                ''')    
+        connection.execute(''' CREATE TABLE \"setting\"
+                (library TEXT PRIMARY KEY     NOT NULL,
+                input           TEXT    NOT NULL,
+                view_mode            INT     NOT NULL,
+                thresh        FLOAT);
+                ''')   
     except:
         pass
+    
+    
+    Label(s_win, text='threshold').place(x=10, y=10)
+    enter = Entry(s_win)
+    enter.place(x=95 , y=10)
+    #change threshold
+    def change_thresh():
+        try:
+            if float(enter.get()) >= 0.1 and float(enter.get()) <= 1:   
+                info[3] = float(enter.get())
+                connection.execute(f"INSERT INTO setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\")")      
+                connection.commit()            
+        except:
+            messagebox.showerror("threshold error", "threshold must be between 0.1 and 1")
+            win.bind('<FocusIn>', win.lower())
+            pass
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+    Button(s_win, text="save", command= lambda: change_thresh()).place(x=220,y=100)
+    s_win.mainloop()
 
 
 
 
 
 # tkinter backgroung and icon
+def go():
+    label = Label(win)
+    label.place(x=-60, y=-30)
+    image = Image.open(home+"/media/item_detec.gif")
+    frames = []
+    try:
+        while True:
+            frames.append(ImageTk.PhotoImage(image))
+            image.seek(len(frames))
+    except EOFError:
+        pass
+    def update_frame(frame_index):
+        label.config(image=frames[frame_index])
+        win.after(100, update_frame, (frame_index + 1) % len(frames))
+    update_frame(0)
+# go()
 
-label = Label(win)
-label.place(x=-60, y=-30)
-image = Image.open(home+"/media/item_detec.gif")
-frames = []
-try:
-    while True:
-        frames.append(ImageTk.PhotoImage(image))
-        image.seek(len(frames))
-except EOFError:
-    pass
-def update_frame(frame_index):
-    label.config(image=frames[frame_index])
-    win.after(100, update_frame, (frame_index + 1) % len(frames))
-update_frame(0)
 
 
-labe_intro = Label(text="wellcome").place(x=190, y=10)
-Button(win, text="start", command= lambda : start(), fg="blue").place(x=10, y=50)
-Button(win, text="choose input", command=lambda: video()).place(x=10, y=85)
-Button(win, text="library manager", command= lambda : library()).place(x=10, y=120)
-Button(win, text="ML trainer", command= lambda : train()).place(x=10, y=155)
-Button(win, text="setting", command= lambda : setting()).place(x=10, y=190)
-Button(win, text="close", command= lambda : quit(), fg="red").place(x=10, y=225)
+labe_intro = Label(text="wellcome", fg="red").place(x=50, y=10)
+Button(win, text="start", command= lambda : start(), fg="blue").place(x=170, y=50)
+Button(win, text="choose input", command=lambda: video()).place(x=170, y=85)
+Button(win, text="library manager", command= lambda : library()).place(x=170, y=120)
+Button(win, text="ML trainer", command= lambda : train()).place(x=170, y=155)
+Button(win, text="setting", command= lambda : setting()).place(x=170, y=190)
+Button(win, text="close", command= lambda : quit(), fg="red").place(x=170, y=225)
 
 win.mainloop()
