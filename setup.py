@@ -17,7 +17,7 @@ chdir(current_directory)
 print("installig ...")
 
 try:
-    call(f"python -m nuitka --enable-plugin=tk-inter --disable-console --windows-icon-from-ico=media/icon.ico main_app.py")
+    call(f"python -m nuitka --enable-plugin=tk-inter --disable-console --windows-icon-from-ico=media/icon.ico app.py")
     print("-------installination is done")
 except:
     print("installination failed.")

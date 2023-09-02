@@ -22,33 +22,33 @@ from tkinter import Tk, Label, Button, Entry, StringVar, PhotoImage, messagebox,
 
 
 #creating directory and needed folders
-home = getcwd() + "\\"
+home = getcwd() + "/"
 try:
     mkdir(home+"ML_train")
 except:
     pass
 try:
-    mkdir(home+"ML_train\\train")
+    mkdir(home+"ML_train/train")
 except:
     pass
 try:   
-    mkdir(home+"ML_train\\train\\images")
+    mkdir(home+"ML_train/train/images")
 except:
     pass
 try:
-    mkdir(home+"ML_train\\train\\labels")
+    mkdir(home+"ML_train/train/labels")
 except:
     pass
 try:
-    mkdir(home+"ML_train\\valid")
+    mkdir(home+"ML_train/valid")
 except:
     pass
 try:
-    mkdir(home+"ML_train\\valid\\images")
+    mkdir(home+"ML_train/valid/images")
 except:
     pass
 try:
-    mkdir(home+"ML_train\\valid\\labels")
+    mkdir(home+"ML_train/valid/labels")
 except:
     pass
 
@@ -68,7 +68,7 @@ win = Tk() #main tkinter window
 win.title("image processor") #title
 win.geometry("400x290")
 win.resizable(width=False, height=False) #make its size unchangable
-win.iconphoto(False, PhotoImage(file = home + '\\media\\icon.png'))
+win.iconphoto(False, PhotoImage(file = home + '/media/icon.png'))
 file_adress = home+"data.txt" #txt file to store data-set locations
 
 def time(): #function to retun time
@@ -311,12 +311,12 @@ def start():           #main func to start the program and start window
                         connection.execute(f"INSERT INTO \"data_center\" values (\"{uuid+str(box.id[0].item())}\", \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")           
                         connection.commit()
                         if i == 6 :
-                            imwrite(f"{home}ML_train\\valid\\images\\{time()}_{class_id}.jpg", frame)
-                            open(f"{home}ML_train\\valid\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                            imwrite(f"{home}ML_train/valid/images/{time()}_{class_id}.jpg", frame)
+                            open(f"{home}ML_train/valid/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
                             i = 0
                         else:
-                            imwrite(f"{home}ML_train\\train\\images\\{time()}_{class_id}.jpg", frame)
-                            open(f"{home}ML_train\\train\\labels\\{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                            imwrite(f"{home}ML_train/train/images/{time()}_{class_id}.jpg", frame)
+                            open(f"{home}ML_train/train/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
                             i += 1
                     except:
                         pass
@@ -353,7 +353,7 @@ def train():    #creating tkinter window to train a new data-set
         nonlocal address
         try:
             model = YOLO(address)
-            model.train(data=home + "ML_train\\data.yaml", epochs=30)
+            model.train(data=home + "ML_train/data.yaml", epochs=30)
         except:
             messagebox.showerror("training error", "make sure all data is correct")
     def stop_tain():
@@ -397,7 +397,7 @@ def setting():
 
 label = Label(win)
 label.place(x=-60, y=-30)
-image = Image.open(home+"\\media\\item_detec.gif")
+image = Image.open(home+"/media/item_detec.gif")
 frames = []
 try:
     while True:
