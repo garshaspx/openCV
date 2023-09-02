@@ -23,12 +23,14 @@ def cam_finder():
             arr.append(index)
         cap.release()
         index += 1
+    print("cam_finder done")
 cam_loader = Thread(target=cam_finder)
 
 YOLO = None
 def yol():
     global YOLO
     from ultralytics import YOLO
+    print("YOLO imported")
 yol_thread = Thread(target=yol)    
 
 
@@ -80,8 +82,6 @@ except:
     pass
 
 
-
-
 win = Tk() #main tkinter window 
 win.title("image processor") #title
 win.geometry("400x290")
@@ -101,8 +101,8 @@ except:
 
 
 
-#info = [library-address,  video-input, "ON or OFF", threshold]
-info = ["None", 0, "ON", 0.7]
+#info = [library-address,  video-input, "ON or OFF", threshold, bg gif]
+info = ["None", 0, "ON", 0.7, "ON"]
 
 def library(): #function to manage library manager window 
     global info
@@ -219,7 +219,7 @@ def video():        #func to choose video input
         cam_chooser['values'] = ["no camera found"]
         cam_chooser.current(0)
     cam_chooser.place(x=150, y=10) 
-        
+
     Label(vid_win, text="choose a video : ").place(x=20, y=50)
     Button(vid_win, text="choose", command=lambda:video_loc()).place(x=180, y=50)    
     Button(vid_win, text="save", fg="red", command=lambda:save()).place(x=270, y=50)
@@ -312,20 +312,16 @@ def start():           #main func to start the program and start window
         while True: #main loop 
             _, frame = cap.read()
             view = frame 
-            
             results = model.track(view, persist=True, conf=info[3])#proccessing the frame              #  save_txt=True save data in txt
             result = results[0] 
             
             for box in result.boxes:         # puting bouding box around found items
-                
                 class_id = result.names[box.cls[0].item()]
                 cords = [round(x) for x in box.xyxy[0].tolist()]
                 conf = round(box.conf[0].item(), 2)
                 id_item = box.cls[0].item()
-                
                 if conf >= info[3]:        #threshold if
                     view = results[0].plot()
-                
                     try:   # storing data in database and saving image and labels for training
                         connection.execute(f"INSERT INTO \"data_center\" values (\"{uuid+str(box.id[0].item())}\", \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")           
                         connection.commit()
@@ -407,41 +403,59 @@ def setting():
                 thresh        FLOAT);
                 ''')   
     except:
-        pass
+        pass    
     
-    
-    Label(s_win, text='threshold').place(x=10, y=10)
+    Label(s_win, text='threshold : ').place(x=10, y=10)
     enter = Entry(s_win)
     enter.place(x=95 , y=10)
+    
     #change threshold
     def change_thresh():
         try:
             if float(enter.get()) >= 0.1 and float(enter.get()) <= 1:   
                 info[3] = float(enter.get())
-                connection.execute(f"INSERT INTO setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\")")      
-                connection.commit()            
+                # connection.execute(f"INSERT INTO setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\")")      
+                # connection.commit()
+                s_win.destroy()
         except:
             messagebox.showerror("threshold error", "threshold must be between 0.1 and 1")
             win.bind('<FocusIn>', win.lower())
-            pass
 
-
-
-
-
-
-
-
-
-
-
-
-
+    def switch():          #option to make view mode on or off
+        if info[4] == "ON":
+            info[4] = "OFF"
+            switch_but = Button(s_win, text=info[4], command=lambda: switch())
+            switch_but.place(x=130, y=35)
+            for widget in win.winfo_children():
+                widget.destroy()
+            Label(text="wellcome", fg="red").place(x=50, y=10)
+            Button(win, text="start", command= lambda : start(), fg="blue").place(x=170, y=50)
+            Button(win, text="choose input", command=lambda: video()).place(x=170, y=85)
+            Button(win, text="library manager", command= lambda : library()).place(x=170, y=120)
+            Button(win, text="ML trainer", command= lambda : train()).place(x=170, y=155)
+            Button(win, text="setting", command= lambda : setting()).place(x=170, y=190)
+            Button(win, text="close", command= lambda : exit(), fg="red").place(x=170, y=225)
+            s_win.update()
+        else:
+            info[4] = "ON"
+            switch_but = Button(s_win, text=info[4]+" ", command=lambda: switch())
+            switch_but.place(x=130, y=35)
+            go()
+            Label(text="wellcome", fg="red").place(x=50, y=10)
+            Button(win, text="start", command= lambda : start(), fg="blue").place(x=170, y=50)
+            Button(win, text="choose input", command=lambda: video()).place(x=170, y=85)
+            Button(win, text="library manager", command= lambda : library()).place(x=170, y=120)
+            Button(win, text="ML trainer", command= lambda : train()).place(x=170, y=155)
+            Button(win, text="setting", command= lambda : setting()).place(x=170, y=190)
+            Button(win, text="close", command= lambda : exit(), fg="red").place(x=170, y=225)
+            s_win.update()
+            
+    Label(s_win, text="background gif : ").place(x=10, y=40)
+    switch_but = Button(s_win, text=info[4], command=lambda: switch())
+    switch_but.place(x=130, y=35)
 
     Button(s_win, text="save", command= lambda: change_thresh()).place(x=220,y=100)
     s_win.mainloop()
-
-
 
 
 
@@ -458,19 +472,22 @@ def go():
     except EOFError:
         pass
     def update_frame(frame_index):
-        label.config(image=frames[frame_index])
+        if info[4] == "OFF":
+            return
+        x = label.config(image=frames[frame_index])
         win.after(100, update_frame, (frame_index + 1) % len(frames))
     update_frame(0)
-# go()
+if info[4] == "ON":
+    go()
 
 
-
-labe_intro = Label(text="wellcome", fg="red").place(x=50, y=10)
+Label(text="wellcome", fg="red").place(x=50, y=10)
 Button(win, text="start", command= lambda : start(), fg="blue").place(x=170, y=50)
 Button(win, text="choose input", command=lambda: video()).place(x=170, y=85)
 Button(win, text="library manager", command= lambda : library()).place(x=170, y=120)
 Button(win, text="ML trainer", command= lambda : train()).place(x=170, y=155)
 Button(win, text="setting", command= lambda : setting()).place(x=170, y=190)
-Button(win, text="close", command= lambda : quit(), fg="red").place(x=170, y=225)
+Button(win, text="close", command= lambda : exit(), fg="red").place(x=170, y=225)
+
 
 win.mainloop()
