@@ -8,10 +8,15 @@
 
 
 
+
+
+
 #using multi-threading for faster loading
+from tkinter import Tk, Label
 from cv2 import VideoCapture
 from threading import Thread
 
+win = Tk() #main tkinter window
 arr = []#list of cameras
 def cam_finder():
     index = 0 
@@ -23,14 +28,16 @@ def cam_finder():
             arr.append(index)
         cap.release()
         index += 1
-    print("cam_finder done")
 cam_loader = Thread(target=cam_finder)
 
 YOLO = None
 def yol():
+    load_label = Label(win, text="loading... please wait", bg='red', fg='white')
+    load_label.place(x=240, y=228)
     global YOLO
     from ultralytics import YOLO
-    print("YOLO imported")
+    load_label.destroy()
+    win.update()
 yol_thread = Thread(target=yol)    
 
 
@@ -46,7 +53,7 @@ from datetime import datetime
 from PIL import ImageTk, Image
 from os import path, mkdir, getcwd
 from cv2 import imshow, waitKey, destroyAllWindows, imwrite
-from tkinter import Tk, Label, Button, Entry, StringVar, PhotoImage, messagebox, filedialog, ttk
+from tkinter import Button, Entry, StringVar, PhotoImage, messagebox, filedialog, ttk, Toplevel
 
 
 
@@ -82,7 +89,7 @@ except:
     pass
 
 
-win = Tk() #main tkinter window 
+
 win.title("image processor") #title
 win.geometry("400x290")
 win.resizable(width=False, height=False) #make its size unchangable
@@ -103,6 +110,33 @@ except:
 
 #info = [library-address,  video-input, "ON or OFF", threshold, bg gif]
 info = ["None", 0, "ON", 0.7, "ON"]
+
+connection = connect(home+'data_center.db')
+try:
+    connection.execute(''' CREATE TABLE \"setting\"
+            (library TEXT PRIMARY KEY     NOT NULL,
+            input           TEXT    NOT NULL,
+            view_mode            INT     NOT NULL,
+            thresh        FLOAT,
+            bg_gif TEXT);
+            ''')
+    connection.execute(f"INSERT INTO setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\")")      
+    connection.commit() 
+except:
+    
+    
+    pass
+
+# cur = connection.cursor()
+# cur.execute("SELECT * FROM tasks")
+
+# rows = cur.fetchall()
+
+# for row in rows:
+#     print(row)
+
+
+
 
 def library(): #function to manage library manager window 
     global info
@@ -140,7 +174,7 @@ def library(): #function to manage library manager window
         name_entry = Entry(new_library_win)
         name_entry.grid(row=1, column=1)
         Button(new_library_win, text="choose:", command=lambda : choose_direc()).grid(row=2, column=1) 
-        address = "----"
+        address = "---"
     
         def choose_direc():
             nonlocal address
@@ -153,6 +187,10 @@ def library(): #function to manage library manager window
     
         def save():                #saaving the data in txt file and closing new lib window
             nonlocal address
+            if address == "---":
+                messagebox.showerror("error", "file address is not correct")
+                win.bind('<FocusIn>', win.lower())
+                return
             con_file = open(file_adress, "a")
             con_file.write(f"{name_entry.get()}=={address}\n")
             con_file.close()
@@ -248,15 +286,15 @@ def video():        #func to choose video input
 
 
 def start():           #main func to start the program and start window
-    yol_thread.join()
     global info
-    
-    if info[0] == "None": #incase input and data-set wasnt choosen
+    if info[0] == "None" or info[0] == '----': #incase input and data-set wasnt choosen
         messagebox.showerror("library error", "choose your library before starting")
         return    
     elif info[1] == False:
         messagebox.showerror("input error", "choose video input")
         return
+    
+    yol_thread.join()
     
     win_start = Tk()  #creating start window
     win_start.title("image matcher")
@@ -309,6 +347,7 @@ def start():           #main func to start the program and start window
         
         uuid = str(uuid4()) #create a uniqe id , its used in database
         i = 0
+        
         while True: #main loop 
             _, frame = cap.read()
             view = frame 
@@ -347,17 +386,22 @@ def start():           #main func to start the program and start window
 
 
 
+
+
+
+
+
 def train():    #creating tkinter window to train a new data-set
     train_win = Tk()
     train_win.title("train")
     train_win.geometry("300x120")
     train_win.resizable(width=False, height=False)
-    Label(train_win, text="choose algoritm to train model :").place(x=10, y=10)
+    Label(train_win, text="choose algif_playerritm to train model :").place(x=10, y=10)
     Button(train_win, text="choose:", command=lambda : choose_direc()).place(x=210, y=10)
     Button(train_win, text="start training", command= lambda : Thread(target=start_train).start()).place(x=200, y=80)
     Button(train_win, text="stop training", bg="red" ,command= lambda : stop_tain()).place(x=100, y=80)
     address = ""
-    def choose_direc():  #loading training algoritm
+    def choose_direc():  #loading training algif_playerritm
         nonlocal address
         file_ad = filedialog.askopenfile(mode='r', filetypes=[('data Files', '*.pt')])
         if file_ad:
@@ -384,38 +428,31 @@ def train():    #creating tkinter window to train a new data-set
 
 
 
-# info = [library-address,  video-input, "ON or OFF", threshold]
-# info = ["None", 0, "ON", 0.7]
+
+
+
+
+#info = [library-address,  video-input, "ON or OFF", threshold, bg gif]
+# info = ["None", 0, "ON", 0.7, "ON"]
 # add setting to choose camera and other stuff
+
 def setting():
     global info
     s_win = Tk()
     s_win.title("setting")
     s_win.geometry("300x150") 
     s_win.resizable(width=False, height=False)
-    
-    connection = connect(home+'data_center.db')
-    try:
-        connection.execute(''' CREATE TABLE \"setting\"
-                (library TEXT PRIMARY KEY     NOT NULL,
-                input           TEXT    NOT NULL,
-                view_mode            INT     NOT NULL,
-                thresh        FLOAT);
-                ''')   
-    except:
-        pass    
+      
     
     Label(s_win, text='threshold : ').place(x=10, y=10)
     enter = Entry(s_win)
+    enter.insert(0, info[3])
     enter.place(x=95 , y=10)
-    
     #change threshold
     def change_thresh():
         try:
             if float(enter.get()) >= 0.1 and float(enter.get()) <= 1:   
                 info[3] = float(enter.get())
-                # connection.execute(f"INSERT INTO setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\")")      
-                # connection.commit()
                 s_win.destroy()
         except:
             messagebox.showerror("threshold error", "threshold must be between 0.1 and 1")
@@ -429,25 +466,25 @@ def setting():
             for widget in win.winfo_children():
                 widget.destroy()
             Label(text="wellcome", fg="red").place(x=50, y=10)
-            Button(win, text="start", command= lambda : start(), fg="blue").place(x=170, y=50)
-            Button(win, text="choose input", command=lambda: video()).place(x=170, y=85)
-            Button(win, text="library manager", command= lambda : library()).place(x=170, y=120)
-            Button(win, text="ML trainer", command= lambda : train()).place(x=170, y=155)
-            Button(win, text="setting", command= lambda : setting()).place(x=170, y=190)
-            Button(win, text="close", command= lambda : exit(), fg="red").place(x=170, y=225)
+            Button(win, text="start", command= lambda : start(), fg="blue").place(x=50, y=50)
+            Button(win, text="choose input", command=lambda: video()).place(x=50, y=85)
+            Button(win, text="library manager", command= lambda : library()).place(x=50, y=120)
+            Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
+            Button(win, text="setting", command= lambda : setting()).place(x=50, y=190)
+            Button(win, text="close", command= lambda : exit(), fg="red").place(x=50, y=225)
             s_win.update()
         else:
             info[4] = "ON"
             switch_but = Button(s_win, text=info[4]+" ", command=lambda: switch())
             switch_but.place(x=130, y=35)
-            go()
+            gif_player()
             Label(text="wellcome", fg="red").place(x=50, y=10)
-            Button(win, text="start", command= lambda : start(), fg="blue").place(x=170, y=50)
-            Button(win, text="choose input", command=lambda: video()).place(x=170, y=85)
-            Button(win, text="library manager", command= lambda : library()).place(x=170, y=120)
-            Button(win, text="ML trainer", command= lambda : train()).place(x=170, y=155)
-            Button(win, text="setting", command= lambda : setting()).place(x=170, y=190)
-            Button(win, text="close", command= lambda : exit(), fg="red").place(x=170, y=225)
+            Button(win, text="start", command= lambda : start(), fg="blue").place(x=50, y=50)
+            Button(win, text="choose input", command=lambda: video()).place(x=50, y=85)
+            Button(win, text="library manager", command= lambda : library()).place(x=50, y=120)
+            Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
+            Button(win, text="setting", command= lambda : setting()).place(x=50, y=190)
+            Button(win, text="close", command= lambda : exit(), fg="red").place(x=50, y=225)
             s_win.update()
             
     Label(s_win, text="background gif : ").place(x=10, y=40)
@@ -459,8 +496,15 @@ def setting():
 
 
 
+
+
+
+
+
+
+
 # tkinter backgroung and icon
-def go():
+def gif_player():
     label = Label(win)
     label.place(x=-60, y=-30)
     image = Image.open(home+"/media/item_detec.gif")
@@ -478,16 +522,34 @@ def go():
         win.after(100, update_frame, (frame_index + 1) % len(frames))
     update_frame(0)
 if info[4] == "ON":
-    go()
+    gif_player()
+
+
 
 
 Label(text="wellcome", fg="red").place(x=50, y=10)
-Button(win, text="start", command= lambda : start(), fg="blue").place(x=170, y=50)
-Button(win, text="choose input", command=lambda: video()).place(x=170, y=85)
-Button(win, text="library manager", command= lambda : library()).place(x=170, y=120)
-Button(win, text="ML trainer", command= lambda : train()).place(x=170, y=155)
-Button(win, text="setting", command= lambda : setting()).place(x=170, y=190)
-Button(win, text="close", command= lambda : exit(), fg="red").place(x=170, y=225)
-
-
+Button(win, text="start", command= lambda : start(), fg="blue").place(x=50, y=50)
+Button(win, text="choose input", command=lambda: video()).place(x=50, y=85)
+Button(win, text="library manager", command= lambda : library()).place(x=50, y=120)
+Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
+Button(win, text="setting", command= lambda : setting()).place(x=50, y=190)
+Button(win, text="close", command= lambda : win.destroy(), fg="red").place(x=50, y=225)
 win.mainloop()
+
+
+# info = ["Noafgarrrne", 12, "ONfff", 0.111, "fg"]
+
+# connection.execute(f"""
+#     UPDATE setting
+#     SET 
+#     library = {info[0]}, 
+#     input = {info[1]},
+#     view_mode = {info[2]},
+#     thresh = {info[3]},
+#     bg_gif = {info[4]}
+#                   """)
+# connection.commit()
+
+
+# connection.execute(f"UPDATE setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\")")      
+# connection.commit()
