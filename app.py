@@ -40,10 +40,8 @@ def yol():
     win.update()
 yol_thread = Thread(target=yol)    
 
-
 cam_loader.start() #starting diferent threads
 yol_thread.start()
-
 
 #importing all needed librarys, some need to be installed
 from uuid import uuid4
@@ -247,7 +245,7 @@ def video():        #func to choose video input
     vid_win.geometry("320x110")
     vid_win.resizable(width=False, height=False)
     Label(vid_win, text="choose a camera : ").place(x=20, y=10)
-    
+
     cam_chooser = ttk.Combobox(vid_win, width = 20, textvariable = StringVar()) #creating a combobox
     if arr != []:  #adding cams to combobox
         cam_chooser['values'] = arr
@@ -321,7 +319,7 @@ def start():           #main func to start the program and start window
     switch_lab.place(x=170, y=20)
     switch_but = Button(win_start, text=info[2], command=lambda: switch())
     switch_but.place(x=260, y=20)
-        
+    
     adds = info[0].rstrip().split("==") 
     model = YOLO(adds[1]) #loading data-set
 
@@ -332,8 +330,7 @@ def start():           #main func to start the program and start window
     
     def start_match():        #starting the main prosec
         global info
-        connection = connect(home+'data_center.db')          #connecting to data base
-        
+        connection = connect(home+'data_center.db')#connecting to data base
         uuid = str(uuid4()) #create a uniqe id , its used in database
         i = 0
         
@@ -367,11 +364,8 @@ def start():           #main func to start the program and start window
             imshow("item Tracker", view)        #showing it live
             if waitKey(1) == 27 : #close the windows by taping Esc
                 destroyAllWindows()
+                connection.close()
                 break
-
-
-
-
 
 
 
@@ -516,6 +510,7 @@ if info[4] == "ON":
 
 def close():
     win.destroy()
+    connection = connect(home+'data_center.db')
     connection.execute("""DELETE FROM setting""")
     connection.execute(f"insert into setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\", \"{info[4]}\")")
     connection.commit()
