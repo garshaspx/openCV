@@ -46,7 +46,6 @@ yol_thread.start()
 
 
 #importing all needed librarys, some need to be installed
-from sys import exit
 from uuid import uuid4
 from sqlite3 import connect
 from datetime import datetime
@@ -113,6 +112,17 @@ info = ["None", 0, "ON", 0.7, "ON"]
 
 connection = connect(home+'data_center.db')
 try:
+    connection.execute(''' CREATE TABLE \"data_center\"
+            (code TEXT PRIMARY KEY     NOT NULL,
+            name           TEXT    NOT NULL,
+            conf            INT     NOT NULL,
+            cord        INT,
+            time        TEXT);
+            ''')
+except:
+    pass
+
+try:
     connection.execute(''' CREATE TABLE \"setting\"
             (library TEXT PRIMARY KEY     NOT NULL,
             input           TEXT    NOT NULL,
@@ -120,22 +130,12 @@ try:
             thresh        FLOAT,
             bg_gif TEXT);
             ''')
-    connection.execute(f"INSERT INTO setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\")")      
+    connection.execute(f"INSERT INTO setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\", \"{info[4]}\")")      
     connection.commit() 
 except:
-    
-    
-    pass
-
-# cur = connection.cursor()
-# cur.execute("SELECT * FROM tasks")
-
-# rows = cur.fetchall()
-
-# for row in rows:
-#     print(row)
-
-
+    x = connection.execute("SELECT * FROM setting")
+    for row in x:
+        info = list(row)
 
 
 def library(): #function to manage library manager window 
@@ -334,17 +334,6 @@ def start():           #main func to start the program and start window
         global info
         connection = connect(home+'data_center.db')          #connecting to data base
         
-        try:     #createa a table incase it doesnt have it
-            connection.execute(''' CREATE TABLE \"data_center\"
-                    (code TEXT PRIMARY KEY     NOT NULL,
-                    name           TEXT    NOT NULL,
-                    conf            INT     NOT NULL,
-                    cord        INT,
-                    time        TEXT);
-                    ''')
-        except:
-            pass
-        
         uuid = str(uuid4()) #create a uniqe id , its used in database
         i = 0
         
@@ -471,7 +460,7 @@ def setting():
             Button(win, text="library manager", command= lambda : library()).place(x=50, y=120)
             Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
             Button(win, text="setting", command= lambda : setting()).place(x=50, y=190)
-            Button(win, text="close", command= lambda : exit(), fg="red").place(x=50, y=225)
+            Button(win, text="close", command= lambda : close(), fg="red").place(x=50, y=225)
             s_win.update()
         else:
             info[4] = "ON"
@@ -484,7 +473,7 @@ def setting():
             Button(win, text="library manager", command= lambda : library()).place(x=50, y=120)
             Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
             Button(win, text="setting", command= lambda : setting()).place(x=50, y=190)
-            Button(win, text="close", command= lambda : exit(), fg="red").place(x=50, y=225)
+            Button(win, text="close", command= lambda : close(), fg="red").place(x=50, y=225)
             s_win.update()
             
     Label(s_win, text="background gif : ").place(x=10, y=40)
@@ -525,31 +514,19 @@ if info[4] == "ON":
     gif_player()
 
 
-
-
+def close():
+    win.destroy()
+    connection.execute("""DELETE FROM setting""")
+    connection.execute(f"insert into setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\", \"{info[4]}\")")
+    connection.commit()
+    quit()
+    
 Label(text="wellcome", fg="red").place(x=50, y=10)
 Button(win, text="start", command= lambda : start(), fg="blue").place(x=50, y=50)
 Button(win, text="choose input", command=lambda: video()).place(x=50, y=85)
 Button(win, text="library manager", command= lambda : library()).place(x=50, y=120)
 Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
 Button(win, text="setting", command= lambda : setting()).place(x=50, y=190)
-Button(win, text="close", command= lambda : win.destroy(), fg="red").place(x=50, y=225)
+Button(win, text="close", command= lambda : close(), fg="red").place(x=50, y=225)
+
 win.mainloop()
-
-
-# info = ["Noafgarrrne", 12, "ONfff", 0.111, "fg"]
-
-# connection.execute(f"""
-#     UPDATE setting
-#     SET 
-#     library = {info[0]}, 
-#     input = {info[1]},
-#     view_mode = {info[2]},
-#     thresh = {info[3]},
-#     bg_gif = {info[4]}
-#                   """)
-# connection.commit()
-
-
-# connection.execute(f"UPDATE setting values (\"{info[0]}\", \"{info[1]}\", \"{info[2]}\", \"{info[3]}\")")      
-# connection.commit()
