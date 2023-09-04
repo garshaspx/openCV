@@ -33,12 +33,19 @@ cam_loader.start() #starting thread
 
 YOLO = None
 def yol():
-    load_label = Label(win, text="loading... please wait", bg='red', fg='white') #tkinter label so we know the is loaded
-    load_label.place(x=240, y=228)
+    try:
+        load_label = Label(win, text="loading... please wait", bg='red', fg='white') #tkinter label so we know the is loaded
+        load_label.place(x=240, y=228)
+    except:
+        print("yolo labal import failed")
     global YOLO 
     from ultralytics import YOLO
-    load_label.destroy() #clearing label after loading
+    try:
+        load_label.destroy() #clearing label after loading
+    except:
+        pass
     win.update()
+
 yol_thread = Thread(target=yol)  #put it in a new thread
 yol_thread.start()  #starting thread
 
@@ -50,9 +57,6 @@ from PIL import ImageTk, Image
 from os import path, mkdir, getcwd
 from cv2 import imshow, waitKey, destroyAllWindows, imwrite
 from tkinter import Button, Entry, StringVar, PhotoImage, messagebox, filedialog, ttk, Toplevel
-
-
-
 
 
 
@@ -98,7 +102,7 @@ except:
 
 win.title("image processor") #title
 win.geometry("400x290")
-win.resizable(width=False, height=False) #make its size unchangable
+# win.resizable(width=False, height=False) #make its size unchangable
 win.iconphoto(False, PhotoImage(file = home + '/media/icon.png'))
 file_adress = home+"data.txt" #txt file to store data-set locations
 
@@ -320,7 +324,7 @@ def start():           #main func to start the program and start window
         return
     
     yol_thread.join()
-    
+
     win_start = Tk()  #creating start window
     win_start.title("image matcher")
     win_start.geometry("300x140")
@@ -382,19 +386,16 @@ def start():           #main func to start the program and start window
 
                     # fix label txt !!!!!!!!
 
-
                     if i%30 == 0 :
                         imwrite(f"{home}ML_train/train/images/{time()}_{class_id}.jpg", frame)
                         open(f"{home}ML_train/train/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
                     elif i%181 == 0 :
                         imwrite(f"{home}ML_train/valid/images/{time()}_{class_id}.jpg", frame)
                         open(f"{home}ML_train/valid/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
-                        i = 0
-       
+                        i = 0       
                     i += 1
 
-                    print(i)
-                
+
             imshow("item Tracker", view)        #showing it live
             if waitKey(1) == 27 : #close the windows by taping Esc
                 destroyAllWindows()
@@ -517,7 +518,6 @@ def setting():
     Label(s_win, text="background gif : ").place(x=10, y=40)
     switch_but = Button(s_win, text=info[4], command=lambda: switch())
     switch_but.place(x=130, y=35)
-
     Button(s_win, text="save", command= lambda: change_thresh()).place(x=220,y=100)
     s_win.mainloop()
 
