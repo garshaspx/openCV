@@ -12,7 +12,7 @@
 
 
 #using multi-threading for faster loading
-from tkinter import Tk, Label
+from tkinter import Tk, Label, messagebox
 from cv2 import VideoCapture
 from threading import Thread
 
@@ -38,14 +38,15 @@ def yol():
         load_label.place(x=240, y=228)
     except:
         messagebox.showerror("error", "unexpected error happend, please restart the app")
-        close(True)
+        # close(True)
     global YOLO 
     from ultralytics import YOLO
     try:
-        load_label.destroy() #clearing label after loading
+        load_label.destroy()
+        win.update() #clearing label after loading
     except:
         pass
-    win.update()
+    
 
 yol_thread = Thread(target=yol)  #put it in a new thread
 yol_thread.start()  #starting thread
@@ -57,7 +58,7 @@ from datetime import datetime
 from PIL import ImageTk, Image
 from os import path, mkdir, getcwd
 from cv2 import imshow, waitKey, destroyAllWindows, imwrite
-from tkinter import Button, Entry, StringVar, PhotoImage, messagebox, filedialog, ttk, Toplevel
+from tkinter import Button, Entry, StringVar, PhotoImage, filedialog, ttk
 
 
 
@@ -166,7 +167,8 @@ def library(): #function to manage library manager window
     lib_win = Tk()
     lib_win.title("library manager")
     lib_win.geometry("410x260")
-    lib_win.resizable(width=False, height=False)                    #
+    lib_win.iconphoto(False, PhotoImage(file = home + '/media/icon.png'))
+    # lib_win.resizable(width=False, height=False)                    #
     tv = ttk.Treeview(lib_win, columns="number", height=9)          # all window options
     tv.place(x=0, y=0)                                              #
     tv.heading("#0", text="Name")
@@ -272,7 +274,7 @@ def video():        #func to choose video input
     vid_win = Tk()
     vid_win.title("choose video input")
     vid_win.geometry("320x110")
-    vid_win.resizable(width=False, height=False)
+    # vid_win.resizable(width=False, height=False)
     Label(vid_win, text="choose a camera : ").place(x=20, y=10)
 
     cam_chooser = ttk.Combobox(vid_win, width = 20, textvariable = StringVar()) #creating a combobox
@@ -330,7 +332,7 @@ def start():           #main func to start the program and start window
     win_start.title("image matcher")
     win_start.geometry("300x140")
     win_start.state("normal")
-    win.resizable(width=False, height=False) #make its size unchangeable
+    # win.resizable(width=False, height=False) #make its size unchangeable
     Label(win_start, text="start matching :").place(x=10, y=20)
     Button(win_start, text="start", command=lambda: Thread(target=start_match).start()).place(x=100, y=20)
     Label(win_start, text="stop matching :   press Esc on your keyboard").place(x=10, y=90)
@@ -418,7 +420,7 @@ def train():    #creating tkinter window to train a new data-set
     train_win = Tk()
     train_win.title("train")
     train_win.geometry("300x120")
-    train_win.resizable(width=False, height=False)
+    # train_win.resizable(width=False, height=False)
     Label(train_win, text="choose algif_playerritm to train model :").place(x=10, y=10)
     Button(train_win, text="choose:", command=lambda : choose_direc()).place(x=210, y=10)
     Button(train_win, text="start training", command= lambda : Thread(target=start_train).start()).place(x=200, y=80)
@@ -468,7 +470,7 @@ def setting():
     s_win = Tk()
     s_win.title("setting")
     s_win.geometry("300x150") 
-    s_win.resizable(width=False, height=False)
+    # s_win.resizable(width=False, height=False)
     Label(s_win, text='threshold : ').place(x=10, y=10)
     enter = Entry(s_win)
     enter.insert(0, info[3])

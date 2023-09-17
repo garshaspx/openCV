@@ -1,7 +1,9 @@
 from subprocess import CalledProcessError, call
 from os import chdir, path
 
-packages = {'ultralytics':'8.0.154', 'lapx':'0.5.2','Nuitka':'1.7.10'}
+# add print info
+
+packages = {'ultralytics':'8.0.154', 'Nuitka':'1.7.10'}
 for package, version in packages.items():
     try:
         call(['pip', 'install', f"{package}=={version}"])
