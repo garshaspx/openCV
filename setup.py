@@ -1,7 +1,7 @@
 from subprocess import CalledProcessError, call
 from os import chdir, path
 
-packages = {'opencv-python':'4.8.0.76', 'ultralytics':'8.0.154', 'pillow':'10.0.0', 'Nuitka':'1.7.10'}
+packages = {'ultralytics':'8.0.154', 'lapx':'0.5.2','Nuitka':'1.7.10'}
 for package, version in packages.items():
     try:
         call(['pip', 'install', f"{package}=={version}"])

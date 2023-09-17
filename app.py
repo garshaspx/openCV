@@ -37,7 +37,8 @@ def yol():
         load_label = Label(win, text="loading... please wait", bg='red', fg='white') #tkinter label so we know the is loaded
         load_label.place(x=240, y=228)
     except:
-        print("yolo labal import failed")
+        messagebox.showerror("error", "unexpected error happend, please restart the app")
+        close(True)
     global YOLO 
     from ultralytics import YOLO
     try:
@@ -554,6 +555,7 @@ def gif_player():
         x = label.config(image=frames[frame_index])
         win.after(100, update_frame, (frame_index + 1) % len(frames))
     update_frame(0)
+    
 if info[4] == "ON":
     gif_player()
 
@@ -584,4 +586,5 @@ Button(win, text="library manager", command= lambda : library()).place(x=50, y=1
 Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
 Button(win, text="setting", command= lambda : setting()).place(x=50, y=190)
 Button(win, text="close", command= lambda : close(True), fg="red").place(x=50, y=225)
+
 win.mainloop()
