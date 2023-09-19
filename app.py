@@ -273,11 +273,11 @@ def video():        #func to choose video input
 
     def video_loc():    #choosing video file from hard drive
         info[1] = filedialog.askopenfile(filetypes=[('data Files', '*.mp4')]).name #file has to be mp4
-        win.bind('<FocusIn>', win.lower())
         if info[1][-3:] == "mp4": 
             vid_win.destroy()
         else:
             messagebox.showerror("file type", "make sure the file you choose is a mp4")    
+            # win.bind('<FocusIn>', win.lower())
     def save():  #saving
         info[1] = cam_chooser.get()
         vid_win.destroy()
@@ -353,18 +353,23 @@ def start():           #main func to start the program and start window
                     except:
                         pass
 
+          
+            numstr = str(i).zfill(5)
+    
+            
                     # fix label txt !!!!!!!!
+            imwrite(f"{home}imgs_for_vid/{numstr}.jpg", view)
+            i += 1
+                    # if i%30 == 0 :
+                    #     imwrite(f"{home}ML_train/train/images/{time()}_{class_id}.jpg", frame)
+                    #     open(f"{home}ML_train/train/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                    # elif i%181 == 0 :
+                    #     imwrite(f"{home}ML_train/valid/images/{time()}_{class_id}.jpg", frame)
+                    #     open(f"{home}ML_train/valid/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                    #     i = 0       
+                    # i += 1
 
-                    if i%30 == 0 :
-                        imwrite(f"{home}ML_train/train/images/{time()}_{class_id}.jpg", frame)
-                        open(f"{home}ML_train/train/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
-                    elif i%181 == 0 :
-                        imwrite(f"{home}ML_train/valid/images/{time()}_{class_id}.jpg", frame)
-                        open(f"{home}ML_train/valid/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
-                        i = 0       
-                    i += 1
-
-            action["save"]()
+            # action["save"]()
             imshow("item Tracker", view)        #showing it live
             if waitKey(1) == 27 : #close the windows by taping Esc
                 destroyAllWindows()
