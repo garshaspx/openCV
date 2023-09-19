@@ -1,0 +1,2 @@
+med==C:\Users\amirhoseinH\Documents\GitHub\openCV\preTrained data\yolov8m.pt
+nano==C:\Users\amirhoseinH\Documents\GitHub\openCV\preTrained data\yolov8n.pt
