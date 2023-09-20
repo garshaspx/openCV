@@ -157,6 +157,36 @@ except:
         info = list(row)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def library(): #function to manage library manager window 
     global info
     lib_win = Tk()
@@ -249,6 +279,34 @@ def library(): #function to manage library manager window
     Button(lib_win, text="active library", command=lambda: active()).place(x=240, y=220)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def video():        #func to choose video input 
     cam_loader.join() # incase cam finder isnt finished
     vid_win = Tk()
@@ -282,6 +340,32 @@ def video():        #func to choose video input
         info[1] = cam_chooser.get()
         vid_win.destroy()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class_id, frame, id_item, cords, view = 0,0,0,0,0
 
 def start():           #main func to start the program and start window
     global info
@@ -329,10 +413,10 @@ def start():           #main func to start the program and start window
         cap = VideoCapture(info[1])
     
     def start_match():        #starting the main prosec
-        global info
+        global info, class_id, frame, id_item, cords, view
         connection = connect(home+'data_center.db')#connecting to data base
         uuid = str(uuid4()) #create a uniqe id , its used in database
-        i = 1
+
         
         while True: #main loop 
             _, frame = cap.read()
@@ -353,28 +437,27 @@ def start():           #main func to start the program and start window
                     except:
                         pass
 
-          
-            numstr = str(i).zfill(5)
-    
-            
                     # fix label txt !!!!!!!!
-            imwrite(f"{home}imgs_for_vid/{numstr}.jpg", view)
-            i += 1
-                    # if i%30 == 0 :
-                    #     imwrite(f"{home}ML_train/train/images/{time()}_{class_id}.jpg", frame)
-                    #     open(f"{home}ML_train/train/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
-                    # elif i%181 == 0 :
-                    #     imwrite(f"{home}ML_train/valid/images/{time()}_{class_id}.jpg", frame)
-                    #     open(f"{home}ML_train/valid/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
-                    #     i = 0       
-                    # i += 1
+            
+                    try:
+                        action["create_ml"]()
+                    except:
+                        pass
 
-            # action["save"]()
+
+            try:
+                action["save_img"]()
+            except:
+                pass
             imshow("item Tracker", view)        #showing it live
             if waitKey(1) == 27 : #close the windows by taping Esc
                 destroyAllWindows()
                 connection.close()
                 break
+
+
+
+
 
 
 
@@ -421,6 +504,18 @@ def train():    #creating tkinter window to train a new data-set
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 #info = [library-address,  video-input-index, "ON or OFF", threshold, bg gif, image for video, machinelearning dataset]
 # info = ["None"          ,  0                , "ON"       , 0.6      , "ON"  , "OFF"          , "ON"]
 # add setting to choose camera and other stuff
@@ -432,31 +527,33 @@ def setting():
     s_win.geometry("300x150") 
     # s_win.resizable(width=False, height=False)
 
-
     Label(s_win, text='threshold : ').place(x=10, y=10)
     enter = Entry(s_win)
     enter.insert(0, info[3])
     enter.place(x=95 , y=10)
     #change threshold
     def change_thresh():
-        # try:
-        if float(enter.get()) >= 0.1 and float(enter.get()) <= 1:   
-            info[3] = float(enter.get())
-            s_win.destroy()
-            close(False)
-        # except:
-        #     messagebox.showerror("threshold error", "threshold must be between 0.1 and 1")
-        #     win.bind('<FocusIn>', win.lower())
+        try:
+            if float(enter.get()) >= 0.001 and float(enter.get()) <= 1:   
+                info[3] = float(enter.get())
+                s_win.destroy()
+                try:
+                    close(False)
+                except:
+                    pass
+        except:
+            messagebox.showerror("threshold error", "threshold must be between 0.1 and 1")
+            win.bind('<FocusIn>', win.lower())
 
     #option to make view mode on or off
     Label(s_win, text="background gif : ").place(x=10, y=40)
-    switch_but = Button(s_win, text=info[4]+" ", command=lambda: switch())
-    switch_but.place(x=140, y=35)
+    switch_but_gif = Button(s_win, text=info[4], command=lambda: switch())
+    switch_but_gif.place(x=140, y=35)
     def switch():          
         if info[4] == "ON":
             info[4] = "OFF"
-            switch_but = Button(s_win, text=info[4], command=lambda: switch())
-            switch_but.place(x=140, y=35)
+            switch_but_gif = Button(s_win, text=info[4], command=lambda: switch())
+            switch_but_gif.place(x=140, y=35)
             for widget in win.winfo_children():
                 widget.destroy()
             Label(text="wellcome", fg="red").place(x=50, y=10)
@@ -470,8 +567,8 @@ def setting():
             close(False)
         else:
             info[4] = "ON"
-            switch_but = Button(s_win, text=info[4]+" ", command=lambda: switch())
-            switch_but.place(x=140, y=35)
+            switch_but_gif = Button(s_win, text=info[4]+" ", command=lambda: switch())
+            switch_but_gif.place(x=140, y=35)
             gif_player()
             Label(text="wellcome", fg="red").place(x=50, y=10)
             Button(win, text="start", command= lambda : start(), fg="blue").place(x=50, y=50)
@@ -484,40 +581,96 @@ def setting():
             close(False)
 
 
+
+
     # create images for video creation
     def image_for_video():
         if info[5] == "OFF":
             info[5] = "ON"
-            switch_but = Button(s_win, text=info[5], command=lambda: image_for_video())
-            switch_but.place(x=140, y=65)
+            switch_but_img = Button(s_win, text=info[5]+" ", command=lambda: image_for_video())
+            switch_but_img.place(x=140, y=65)
             s_win.update()
-
-
+            i = 0
             def save_img():
-                imwrite(f"{home}imgs_for_vid/_{class_id}.jpg", view)
-
-            action["save"] = save_img
-            print("image saver for vid on")
+                nonlocal i
+                numstr = str(i).zfill(10)
+                imwrite(f"{home}imgs_for_vid/_{numstr}.jpg", view)
+                i += 1  
+            action["save_img"] = save_img
         else:
             info[5] = "OFF"
-            switch_but = Button(s_win, text=info[5], command=lambda: image_for_video())
-            switch_but.place(x=140, y=65)
+            switch_but_img = Button(s_win, text=info[5], command=lambda: image_for_video())
+            switch_but_img.place(x=140, y=65)
             s_win.update()
-
-
+            try:
+                action.pop("save_img")
+            except:
+                pass
     Label(s_win, text="image saver for video: ").place(x=10, y=65)
-    switch_but = Button(s_win, text=info[5], command=lambda: image_for_video())
-    switch_but.place(x=140, y=65)
+    switch_but_img = Button(s_win, text=info[5], command=lambda: image_for_video())
+    switch_but_img.place(x=140, y=65)
+
+
+
+
+
+
+
 
 
 
 
     #machine learning data set
+    def data_ml():
+        if info[6] == "OFF":
+            info[6] = "ON"
+            switch_but_ml = Button(s_win, text=info[6]+" ", command=lambda: data_ml())
+            switch_but_ml.place(x=140, y=95)
+            s_win.update()
+            i = 0
+            global class_id, frame, id_item, cords
+            def creat_ml():
+                nonlocal i
+                if i%30 == 0 :
+                    imwrite(f"{home}ML_train/train/images/{time()}_{class_id}.jpg", frame)
+                    open(f"{home}ML_train/train/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                elif i%181 == 0 :
+                    imwrite(f"{home}ML_train/valid/images/{time()}_{class_id}.jpg", frame)
+                    open(f"{home}ML_train/valid/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                    i = 0 
+                i += 1  
+            action["create_ml"] = creat_ml
+        else:
+            info[6] = "OFF"
+            switch_but_ml = Button(s_win, text=info[6], command=lambda: data_ml())
+            switch_but_ml.place(x=140, y=95)
+            s_win.update()
+            try:
+                action.pop("create_ml")
+            except:
+                pass
+    Label(s_win, text="data for ML : ").place(x=10, y=95)
+    switch_but_ml = Button(s_win, text=info[6], command=lambda: data_ml())
+    switch_but_ml.place(x=140, y=95)
+
+
 
 
 
     Button(s_win, text="save", command= lambda: change_thresh()).place(x=220,y=100)
     s_win.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -572,6 +725,12 @@ def close(x):
     if x: 
         quit() # close the entire app
  
+
+
+
+
+
+
 
 
 
