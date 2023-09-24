@@ -28,6 +28,8 @@ def cam_finder(): #func to list the cameras
             arr.append(index)
         cap.release()
         index += 1
+    Button(win, text="choose input", command=lambda: video()).place(x=50, y=85)
+    win.update()
 cam_loader = Thread(target=cam_finder) #put it in a new thread
 cam_loader.start() #starting thread
 
@@ -43,11 +45,12 @@ def yol(): #fun to load ultralytics library
         close(True)
     global YOLO 
     from ultralytics import YOLO
+    Button(win, text="start", command= lambda : start(), fg="blue").place(x=50, y=50)
     try:
         load_label.destroy()
-        win.update() #clearing label after loading
     except:
         pass
+    win.update() #clearing label after loading
 
 yol_thread = Thread(target=yol)  #put it in a new thread
 yol_thread.start()  #starting thread
@@ -703,11 +706,8 @@ def close(x):
 
 # main window buttons
 Label(text="wellcome", fg="red").place(x=50, y=10)
-Button(win, text="start", command= lambda : start(), fg="blue").place(x=50, y=50)
-Button(win, text="choose input", command=lambda: video()).place(x=50, y=85)
 Button(win, text="library manager", command= lambda : library()).place(x=50, y=120)
 Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
-Button(win, text="setting", command= lambda : setting()).place(x=50, y=190)
 Button(win, text="close", command= lambda : close(True), fg="red").place(x=50, y=225)
-
+Button(win, text="setting", command= lambda : setting()).place(x=50, y=190)
 win.mainloop()
