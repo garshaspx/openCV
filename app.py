@@ -46,6 +46,8 @@ def yol(): #fun to load ultralytics library
     global YOLO 
     from ultralytics import YOLO
     Button(win, text="start", command= lambda : start(), fg="blue").place(x=50, y=50)
+    Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
+    Button(win, text="setting", command= lambda : setting()).place(x=50, y=190) 
     try:
         load_label.destroy()
     except:
@@ -159,7 +161,6 @@ except:
     x = connection.execute("SELECT * FROM setting") #if table does exist reads data
     for row in x:
         info = list(row)
-        print(info)
 
 
 
@@ -233,7 +234,7 @@ def library(): #function to manage library manager window
                 address = path.abspath(file.name)
             #Label(new_library_win, text= f"chosen library is: {address}").grid(row=2, column=3)
             win.bind('<FocusIn>', win.lower())                  #puting the main window behind
-    
+            
         def save():                #saaving the data in txt file and closing new lib window
             nonlocal address
             if address == "---":
@@ -668,7 +669,6 @@ def gif_player():
             image.seek(len(frames))
     except EOFError:
         pass
-
     def update_frame(frame_index):
         if info[4] == "OFF":
             return
@@ -707,7 +707,5 @@ def close(x):
 # main window buttons
 Label(text="wellcome", fg="red").place(x=50, y=10)
 Button(win, text="library manager", command= lambda : library()).place(x=50, y=120)
-Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
 Button(win, text="close", command= lambda : close(True), fg="red").place(x=50, y=225)
-Button(win, text="setting", command= lambda : setting()).place(x=50, y=190)
 win.mainloop()
