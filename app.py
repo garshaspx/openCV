@@ -47,7 +47,6 @@ def yol(): #fun to load ultralytics library
     from ultralytics import YOLO
     Button(win, text="start", command= lambda : start(), fg="blue").place(x=50, y=50)
     Button(win, text="ML trainer", command= lambda : train()).place(x=50, y=155)
-    Button(win, text="setting", command= lambda : setting()).place(x=50, y=190) 
     try:
         load_label.destroy()
     except:
@@ -58,7 +57,6 @@ yol_thread = Thread(target=yol)  #put it in a new thread
 yol_thread.start()  #starting thread
 
 #importing all needed librarys, some need to be installed
-
 from shutil import rmtree
 from uuid import uuid4
 from sqlite3 import connect
@@ -130,7 +128,6 @@ except:                                                 # need to be updated to 
     open(file_adress, "w+")                             #
 
 
-
 #info = [library-address,  video-input-index, view "ON or OFF", threshold, bg gif, image for video, machinelearning dataset]
 info = ["None"          ,  0                , "ON"            , 0.6      , "ON"  , "OFF"          , "OFF"]
 
@@ -161,23 +158,6 @@ except:
     x = connection.execute("SELECT * FROM setting") #if table does exist reads data
     for row in x:
         info = list(row)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -277,23 +257,6 @@ def library(): #function to manage library manager window
     Button(lib_win, text="add library", command=lambda : add_direc_txt()).place(x=40, y=220)
     Button(lib_win, text="delete library", command=lambda: delete()).place(x=135, y=220)
     Button(lib_win, text="active library", command=lambda: active()).place(x=240, y=220)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -417,8 +380,7 @@ def start():           #main func to start the program and start window
         i, j = 0, 0
         while True: #main loop 
             _, frame = cap.read()
-            view = frame 
-            results = model.track(view, persist=True, conf=info[3])#proccessing the frame              #  save_txt=True save data in txt             , device=[2]
+            results = model.track(frame, persist=True, conf=info[3])#proccessing the frame              #  save_txt=True save data in txt             , device=[2]
             result = results[0] 
             
             for box in result.boxes:         # puting bouding box around found items
@@ -426,31 +388,35 @@ def start():           #main func to start the program and start window
                 cords = [round(x) for x in box.xyxy[0].tolist()]
                 conf = round(box.conf[0].item(), 2)
                 id_item = box.cls[0].item()
-                if conf >= info[3]:        #threshold if
-                    view = results[0].plot()
-                    try:   # storing data in database and saving image and labels for training
-                        connection.execute(f"INSERT INTO \"data_center\" values (\"{uuid+str(box.id[0].item())}\", \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")           
-                        connection.commit()
-                    except:
-                        pass
+                # if conf >= info[3]:        #threshold if    test!!!!
+ 
+                try:   # storing data in database and saving image and labels for training
+                    connection.execute(f"INSERT INTO \"data_center\" values (\"{uuid+str(box.id[0].item())}\", \"{class_id}\", {conf}, \"{cords}\", \"{time()}\")")           
+                    connection.commit()
+                except:
+                    pass
 
-                    # fix label txt !!!!!!!!
-            
-                    if info[6] == "ON":
-                        if i%30 == 0 :
-                            imwrite(f"{home}ML_train/train/images/{time()}_{class_id}.jpg", frame)
-                            open(f"{home}ML_train/train/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
-                        elif i%181 == 0 :
-                            imwrite(f"{home}ML_train/valid/images/{time()}_{class_id}.jpg", frame)
-                            open(f"{home}ML_train/valid/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
-                            i = 0 
-                        i += 1  
+                # fix label txt !!!!!!!!
+        
+                if info[6] == "ON":
+                    if i%20 == 0 :
+                        imwrite(f"{home}ML_train/train/images/{time()}_{class_id}.jpg", frame)
+                        open(f"{home}ML_train/train/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                    elif i%61 == 0 :
+                        imwrite(f"{home}ML_train/valid/images/{time()}_{class_id}.jpg", frame)
+                        open(f"{home}ML_train/valid/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                        i = 0 
+                    i += 1  
+
+                frame = results[0].plot()
+
 
             if info[5] == "ON":
                 numstr = str(j).zfill(9)
-                imwrite(f"{home}imgs_for_vid/_{numstr}.jpg", view)
+                imwrite(f"{home}imgs_for_vid/_{numstr}.jpg", frame)
                 j += 1
-            imshow("item Tracker", view)        #showing it live
+                
+            imshow("item Tracker", frame)        #showing it live
             if waitKey(1) == 27 : #close the windows by taping Esc
                 destroyAllWindows()
                 connection.close()
@@ -708,4 +674,5 @@ def close(x):
 Label(text="wellcome", fg="red").place(x=50, y=10)
 Button(win, text="library manager", command= lambda : library()).place(x=50, y=120)
 Button(win, text="close", command= lambda : close(True), fg="red").place(x=50, y=225)
+Button(win, text="setting", command= lambda : setting()).place(x=50, y=190) 
 win.mainloop()
