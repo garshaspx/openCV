@@ -33,7 +33,6 @@ def cam_finder(): #func to list the cameras
 cam_loader = Thread(target=cam_finder) #put it in a new thread
 cam_loader.start() #starting thread
 
-
 # unfixed error >main thread > loading label 
 YOLO = None
 def yol(): #fun to load ultralytics library
@@ -64,6 +63,8 @@ from PIL import ImageTk, Image
 from os import path, mkdir, getcwd
 from cv2 import imshow, waitKey, destroyAllWindows, imwrite
 from tkinter import Button, Entry, StringVar, PhotoImage, filedialog, ttk
+
+
 
 
 
@@ -107,12 +108,17 @@ except:
     pass
 
 
+
+
+
+
+
+
 win.title("image processor") #title
 win.geometry("400x290")
 # win.resizable(width=False, height=False) #make its size unchangable
 win.iconphoto(False, PhotoImage(file = home + '/media/icon.png'))
 file_adress = home+"data.txt" #txt file to store data-set locations
-
 
 def time(): #function to retun time
     now = datetime.now()
@@ -125,7 +131,7 @@ except:                                                 # need to be updated to 
     open(file_adress, "w+")                             #
 
 #info = [library-address,  video-input-index, view "ON or OFF", threshold, bg gif, image for video, machinelearning dataset]
-info = ["None"          ,  0                , "ON"            , 0.6      , "ON"  , "OFF"          , "OFF"]
+info  = ["None"         ,  0                , "ON"            , 0.6      , "ON"  , "OFF"          , "OFF"]
 
 connection = connect(home+'data_center.db') #connection to databas
 try:          #creating data_center table if doesnt exist
@@ -154,6 +160,20 @@ except:
     x = connection.execute("SELECT * FROM setting") #if table does exist reads data
     for row in x:
         info = list(row)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -226,12 +246,11 @@ def library(): #function to manage library manager window
             int(x)
         except:
             return
-        for index, i in enumerate(con_file):
+        for _, i in enumerate(con_file):
             contact = i.rstrip()
             con_list.append(contact)
         con_file = open(file_adress, "w+")
         con_list.pop(int(x))
-    
         for i in con_list:
             con_file.write(i+"\n")
         con_file.close()
@@ -246,6 +265,17 @@ def library(): #function to manage library manager window
     Button(lib_win, text="add library", command=lambda : add_direc_txt()).place(x=40, y=220)
     Button(lib_win, text="delete library", command=lambda: delete()).place(x=135, y=220)
     Button(lib_win, text="active library", command=lambda: active()).place(x=240, y=220)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -318,6 +348,7 @@ def video():        #func to choose video input
 
 def start():           #main func to start the program and start window
     global info
+
     if info[0] == "None" or info[0] == '----': #incase input and data-set wasnt choosen
         messagebox.showerror("library error", "choose your library before starting")
         return    
@@ -367,7 +398,7 @@ def start():           #main func to start the program and start window
         i, j = 0, 0
         while True: #main loop 
             _, frame = cap.read()
-            results = model.track(frame, persist=True, conf=info[3])#proccessing the frame    , device="GPU"          #  save_txt=True save data in txt             , device=[2]
+            results = model.track(frame, persist=True, conf=info[3], device="igpu")#proccessing the frame    , device="GPU"          #  save_txt=True save data in txt             , device=[2]
             result = results[0] 
             
             for box in result.boxes:         # puting bouding box around found items
@@ -460,6 +491,27 @@ def train():    #creating tkinter window to train a new data-set
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #info = [library-address,  video-input-index, "ON or OFF", threshold, bg gif, image for video, machinelearning dataset]
 # info = ["None"          ,  0                , "ON"       , 0.6      , "ON"  , "OFF"          , "ON"]
 # add setting to choose camera and other stuff
@@ -471,12 +523,11 @@ def setting():
     s_win.geometry("300x150") 
     # s_win.resizable(width=False, height=False)
 
-
-
     Label(s_win, text='threshold : ').place(x=10, y=10)
     enter = Entry(s_win)
     enter.insert(0, info[3])
     enter.place(x=95 , y=10)
+
     #change threshold
     def change_thresh():
         try:
@@ -490,8 +541,6 @@ def setting():
         except:
             messagebox.showerror("threshold error", "threshold must be between 0.1 and 1")
             win.bind('<FocusIn>', win.lower())
-
-
 
     #option to make view mode on or off
     Label(s_win, text="background gif : ").place(x=10, y=40)
@@ -528,9 +577,6 @@ def setting():
             s_win.update()
             close(False)
 
-
-
-
     # create images for video creation
     def image_for_video():
         if info[5] == "OFF":
@@ -556,8 +602,6 @@ def setting():
     Label(s_win, text="image saver for video: ").place(x=10, y=65)
     switch_but_img = Button(s_win, text=info[5], command=lambda: image_for_video())
     switch_but_img.place(x=140, y=65)
-
-
 
 
     #machine learning data set
@@ -630,6 +674,15 @@ if info[4] == "ON": #check setting to play background gif
 
 
 
+
+
+
+
+
+
+
+
+
 # func to close the app
 def close(x):
     if x:
@@ -641,8 +694,6 @@ def close(x):
     if x: 
         quit() # close the entire app
  
-
-
 
 
 
