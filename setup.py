@@ -3,7 +3,7 @@ from os import chdir, path
 
 # add print info
 
-packages = {'ultralytics':'8.0.154', 'Nuitka':'1.7.10'}
+packages = {'ultralytics':'8.0.154', 'Nuitka':'1.7.10', 'lapx':'0.5.2'}
 for package, version in packages.items():
     try:
         call(['pip', 'install', f"{package}=={version}"])
