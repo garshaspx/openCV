@@ -53,6 +53,8 @@ yol_thread = Thread(target=yol)  #put it in a new thread
 yol_thread.start()  #starting thread
 
 #importing all needed librarys, some need to be installed
+
+from shutil import rmtree
 from uuid import uuid4
 from sqlite3 import connect
 from datetime import datetime
@@ -124,9 +126,8 @@ except:                                                 # need to be updated to 
 
 
 
-#info = [library-address,  video-input-index, "ON or OFF", threshold, bg gif, image for video, machinelearning dataset]
-info = ["None"          ,  0                , "ON"       , 0.6      , "ON"  , "OFF"          , "ON"]
-action = {}
+#info = [library-address,  video-input-index, view "ON or OFF", threshold, bg gif, image for video, machinelearning dataset]
+info = ["None"          ,  0                , "ON"            , 0.6      , "ON"  , "OFF"          , "OFF"]
 
 connection = connect(home+'data_center.db') #connection to databas
 try:          #creating data_center table if doesnt exist
@@ -155,12 +156,7 @@ except:
     x = connection.execute("SELECT * FROM setting") #if table does exist reads data
     for row in x:
         info = list(row)
-
-
-
-
-
-
+        print(info)
 
 
 
@@ -365,8 +361,6 @@ def video():        #func to choose video input
 
 
 
-class_id, frame, id_item, cords, view = 0,0,0,0,0
-
 def start():           #main func to start the program and start window
     global info
     if info[0] == "None" or info[0] == '----': #incase input and data-set wasnt choosen
@@ -413,15 +407,14 @@ def start():           #main func to start the program and start window
         cap = VideoCapture(info[1])
     
     def start_match():        #starting the main prosec
-        global info, class_id, frame, id_item, cords, view
         connection = connect(home+'data_center.db')#connecting to data base
         uuid = str(uuid4()) #create a uniqe id , its used in database
 
-        
+        i, j = 0, 0
         while True: #main loop 
             _, frame = cap.read()
             view = frame 
-            results = model.track(view, persist=True, conf=info[3])#proccessing the frame              #  save_txt=True save data in txt
+            results = model.track(view, persist=True, conf=info[3])#proccessing the frame              #  save_txt=True save data in txt             , device=[2]
             result = results[0] 
             
             for box in result.boxes:         # puting bouding box around found items
@@ -439,16 +432,20 @@ def start():           #main func to start the program and start window
 
                     # fix label txt !!!!!!!!
             
-                    try:
-                        action["create_ml"]()
-                    except:
-                        pass
+                    if info[6] == "ON":
+                        if i%30 == 0 :
+                            imwrite(f"{home}ML_train/train/images/{time()}_{class_id}.jpg", frame)
+                            open(f"{home}ML_train/train/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                        elif i%181 == 0 :
+                            imwrite(f"{home}ML_train/valid/images/{time()}_{class_id}.jpg", frame)
+                            open(f"{home}ML_train/valid/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
+                            i = 0 
+                        i += 1  
 
-
-            try:
-                action["save_img"]()
-            except:
-                pass
+            if info[5] == "ON":
+                numstr = str(j).zfill(9)
+                imwrite(f"{home}imgs_for_vid/_{numstr}.jpg", view)
+                j += 1
             imshow("item Tracker", view)        #showing it live
             if waitKey(1) == 27 : #close the windows by taping Esc
                 destroyAllWindows()
@@ -513,9 +510,6 @@ def train():    #creating tkinter window to train a new data-set
 
 
 
-
-
-
 #info = [library-address,  video-input-index, "ON or OFF", threshold, bg gif, image for video, machinelearning dataset]
 # info = ["None"          ,  0                , "ON"       , 0.6      , "ON"  , "OFF"          , "ON"]
 # add setting to choose camera and other stuff
@@ -526,6 +520,8 @@ def setting():
     s_win.title("setting")
     s_win.geometry("300x150") 
     # s_win.resizable(width=False, height=False)
+
+
 
     Label(s_win, text='threshold : ').place(x=10, y=10)
     enter = Entry(s_win)
@@ -544,6 +540,8 @@ def setting():
         except:
             messagebox.showerror("threshold error", "threshold must be between 0.1 and 1")
             win.bind('<FocusIn>', win.lower())
+
+
 
     #option to make view mode on or off
     Label(s_win, text="background gif : ").place(x=10, y=40)
@@ -586,36 +584,28 @@ def setting():
     # create images for video creation
     def image_for_video():
         if info[5] == "OFF":
+            try:
+                rmtree(home+"imgs_for_vid")
+                mkdir(home+"imgs_for_vid")
+            except:
+                mkdir(home+"imgs_for_vid")
             info[5] = "ON"
             switch_but_img = Button(s_win, text=info[5]+" ", command=lambda: image_for_video())
             switch_but_img.place(x=140, y=65)
             s_win.update()
-            i = 0
-            def save_img():
-                nonlocal i
-                numstr = str(i).zfill(10)
-                imwrite(f"{home}imgs_for_vid/_{numstr}.jpg", view)
-                i += 1  
-            action["save_img"] = save_img
         else:
+            try:
+                rmtree(home+"imgs_for_vid")
+                mkdir(home+"imgs_for_vid")
+            except:
+                mkdir(home+"imgs_for_vid")
             info[5] = "OFF"
             switch_but_img = Button(s_win, text=info[5], command=lambda: image_for_video())
             switch_but_img.place(x=140, y=65)
             s_win.update()
-            try:
-                action.pop("save_img")
-            except:
-                pass
     Label(s_win, text="image saver for video: ").place(x=10, y=65)
     switch_but_img = Button(s_win, text=info[5], command=lambda: image_for_video())
     switch_but_img.place(x=140, y=65)
-
-
-
-
-
-
-
 
 
 
@@ -627,40 +617,17 @@ def setting():
             switch_but_ml = Button(s_win, text=info[6]+" ", command=lambda: data_ml())
             switch_but_ml.place(x=140, y=95)
             s_win.update()
-            i = 0
-            global class_id, frame, id_item, cords
-            def creat_ml():
-                nonlocal i
-                if i%30 == 0 :
-                    imwrite(f"{home}ML_train/train/images/{time()}_{class_id}.jpg", frame)
-                    open(f"{home}ML_train/train/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
-                elif i%181 == 0 :
-                    imwrite(f"{home}ML_train/valid/images/{time()}_{class_id}.jpg", frame)
-                    open(f"{home}ML_train/valid/labels/{time()}_{class_id}.txt", "w+").write(f"{int(id_item)} {((cords[0]+cords[2])/2/frame.shape[1])} {((cords[1]+cords[3])/2/frame.shape[0])} {(cords[2]-cords[0])/frame.shape[1]} {(cords[3]-cords[1])/frame.shape[0]}")#x center y center width hight
-                    i = 0 
-                i += 1  
-            action["create_ml"] = creat_ml
         else:
             info[6] = "OFF"
             switch_but_ml = Button(s_win, text=info[6], command=lambda: data_ml())
             switch_but_ml.place(x=140, y=95)
             s_win.update()
-            try:
-                action.pop("create_ml")
-            except:
-                pass
     Label(s_win, text="data for ML : ").place(x=10, y=95)
     switch_but_ml = Button(s_win, text=info[6], command=lambda: data_ml())
     switch_but_ml.place(x=140, y=95)
-
-
-
-
-
+    
     Button(s_win, text="save", command= lambda: change_thresh()).place(x=220,y=100)
     s_win.mainloop()
-
-
 
 
 

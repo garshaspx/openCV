@@ -1,3 +1,5 @@
 med==C:\Users\amir2\Documents\GitHub\openCV\preTrained data\yolov8m.pt
 x==C:\Users\amir2\Documents\GitHub\openCV\preTrained data\yolov8x.pt
 nano==C:\Users\amir2\Documents\GitHub\openCV\preTrained data\yolov8n.pt
+xx==C:\Users\amir2\Documents\yolov8x.pt
+seg==C:\Users\amir2\Documents\GitHub\openCV\yolov8n-seg.pt
