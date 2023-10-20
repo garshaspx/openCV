@@ -398,7 +398,7 @@ def start():           #main func to start the program and start window
         i, j = 0, 0
         while True: #main loop 
             _, frame = cap.read()
-            results = model.track(frame, persist=True, conf=info[3], device=0)#proccessing the frame    , device="GPU"          #  save_txt=True save data in txt             , device=[2]
+            results = model.track(frame, persist=True, conf=info[3])#proccessing the frame    , device="GPU"          #  save_txt=True save data in txt             , device=[2]
             result = results[0] 
             
             for box in result.boxes:         # puting bouding box around found items
