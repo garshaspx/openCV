@@ -1,2 +1,0 @@
-nn==C:\Users\amirhoseinH\Documents\GitHub\openCV\preTrained data\yolov8n.pt
-sdv==/home/garshasp/Documents/GitHub/openCV/preTrained data/yolov8n-seg.pt
